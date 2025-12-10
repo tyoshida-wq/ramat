@@ -9,7 +9,7 @@ app.get('/', (c) => {
   return c.render(
     <div class="container">
       <header class="header">
-        <h1 class="title">✨ ソウルメイト</h1>
+        <h1 class="title">✨ Ramat</h1>
         <p class="subtitle">あなただけの守護動物に出会おう</p>
       </header>
 
@@ -53,7 +53,7 @@ app.get('/', (c) => {
       </main>
 
       <footer class="footer">
-        <p>© 2024 Soulmate Generator</p>
+        <p>© 2024 Ramat</p>
       </footer>
     </div>
   )
