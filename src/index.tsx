@@ -1,9 +1,19 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { getCookie, setCookie, deleteCookie } from 'hono/cookie'
 import { renderer } from './renderer'
 import { animals } from './data/animals'
 import { names } from './data/names'
 import { generateProfile, generateImage } from './services/gemini'
+import { 
+  hashPassword, 
+  verifyPassword, 
+  generateToken, 
+  verifyToken,
+  validateEmail,
+  validatePassword,
+  validateUsername
+} from './utils/auth'
 
 type Bindings = {
   GEMINI_API_KEY: string
@@ -12,10 +22,188 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>()
 
+// JWT Secret（環境変数から取得、なければデフォルト値）
+const JWT_SECRET = 'ramat-jwt-secret-key-change-in-production'
+
 // CORS設定
 app.use('/api/*', cors())
 
+// 認証ミドルウェア（ログインページ以外のすべてのページで認証チェック）
+app.use('*', async (c, next) => {
+  const path = c.req.path
+  
+  // ログインページと認証APIは認証不要
+  const publicPaths = ['/login', '/api/auth/register', '/api/auth/login', '/static']
+  const isPublic = publicPaths.some(p => path.startsWith(p))
+  
+  if (isPublic) {
+    return next()
+  }
+  
+  // トークンチェック
+  const token = getCookie(c, 'auth_token')
+  
+  if (!token) {
+    // 未ログインの場合、ログインページにリダイレクト
+    if (path.startsWith('/api/')) {
+      // API呼び出しの場合はJSON返却
+      return c.json({ error: 'Authentication required' }, 401)
+    }
+    return c.redirect('/login')
+  }
+  
+  // トークン検証
+  const payload = await verifyToken(token, JWT_SECRET)
+  
+  if (!payload) {
+    // 無効なトークンの場合、Cookieを削除してログインページへ
+    deleteCookie(c, 'auth_token', { path: '/' })
+    if (path.startsWith('/api/')) {
+      return c.json({ error: 'Invalid token' }, 401)
+    }
+    return c.redirect('/login')
+  }
+  
+  // 認証成功、ユーザーIDをコンテキストに保存
+  c.set('userId', payload.userId)
+  
+  return next()
+})
+
 app.use(renderer)
+
+// ログイン/新規登録ページ
+app.get('/login', (c) => {
+  return c.render(
+    <div class="auth-container">
+      <div class="auth-card">
+        <header class="auth-header">
+          <h1 class="auth-title">🌸 Ramat 🌸</h1>
+          <p class="auth-subtitle">あなただけの守護動物</p>
+        </header>
+
+        {/* タブ切り替え */}
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="loginTab">ログイン</button>
+          <button class="auth-tab" id="registerTab">新規登録</button>
+        </div>
+
+        {/* ログインフォーム */}
+        <form class="auth-form" id="loginForm">
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">📧</span>
+              <span>メールアドレス</span>
+            </label>
+            <input 
+              type="email" 
+              class="auth-input" 
+              id="loginEmail"
+              placeholder="example@mail.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">🔒</span>
+              <span>パスワード</span>
+            </label>
+            <input 
+              type="password" 
+              class="auth-input" 
+              id="loginPassword"
+              placeholder="••••••••"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+
+          <div class="form-error" id="loginError"></div>
+
+          <button type="submit" class="auth-submit-btn" id="loginSubmitBtn">
+            <span class="btn-icon">✨</span>
+            <span class="btn-text">ログイン</span>
+          </button>
+
+          <div class="auth-footer">
+            <a href="/reset-password" class="auth-link">パスワードをお忘れですか？</a>
+          </div>
+        </form>
+
+        {/* 新規登録フォーム */}
+        <form class="auth-form" id="registerForm" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">👤</span>
+              <span>ユーザー名</span>
+            </label>
+            <input 
+              type="text" 
+              class="auth-input" 
+              id="registerUsername"
+              placeholder="あなたの名前"
+              required
+              autocomplete="username"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">📧</span>
+              <span>メールアドレス</span>
+            </label>
+            <input 
+              type="email" 
+              class="auth-input" 
+              id="registerEmail"
+              placeholder="example@mail.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">🔒</span>
+              <span>パスワード</span>
+            </label>
+            <input 
+              type="password" 
+              class="auth-input" 
+              id="registerPassword"
+              placeholder="8文字以上（英数字含む）"
+              required
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div class="form-error" id="registerError"></div>
+
+          <button type="submit" class="auth-submit-btn" id="registerSubmitBtn">
+            <span class="btn-icon">🌸</span>
+            <span class="btn-text">新規登録</span>
+          </button>
+
+          <div class="auth-footer">
+            <p class="auth-note">
+              登録することで、<a href="/terms" class="auth-link">利用規約</a>に同意したものとみなされます
+            </p>
+          </div>
+        </form>
+
+        {/* 説明テキスト */}
+        <div class="auth-description">
+          <p class="auth-desc-icon">🦊</p>
+          <p class="auth-desc-text">ログインして<br />あなたのソウルメイトに会いましょう</p>
+        </div>
+      </div>
+
+      <script src="/static/login.js"></script>
+    </div>
+  )
+})
 
 // トップページ（ランディングページ）
 app.get('/', (c) => {
@@ -1042,6 +1230,202 @@ app.post('/api/mypage/stats', async (c) => {
     }, 500)
   }
 })
+
+// ========================================
+// 認証API
+// ========================================
+
+// API: 新規登録
+app.post('/api/auth/register', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { email, password, username } = body
+
+    // バリデーション
+    if (!email || !password || !username) {
+      return c.json({ error: 'メールアドレス、パスワード、ユーザー名は必須です' }, 400)
+    }
+
+    if (!validateEmail(email)) {
+      return c.json({ error: '有効なメールアドレスを入力してください' }, 400)
+    }
+
+    const passwordValidation = validatePassword(password)
+    if (!passwordValidation.valid) {
+      return c.json({ error: passwordValidation.message }, 400)
+    }
+
+    const usernameValidation = validateUsername(username)
+    if (!usernameValidation.valid) {
+      return c.json({ error: usernameValidation.message }, 400)
+    }
+
+    // メールアドレスの重複チェック
+    const existingUser = await db.prepare(
+      'SELECT id FROM users WHERE email = ?'
+    ).bind(email).first()
+
+    if (existingUser) {
+      return c.json({ error: 'このメールアドレスは既に登録されています' }, 409)
+    }
+
+    // パスワードハッシュ化
+    const passwordHash = await hashPassword(password)
+
+    // ユーザーID生成
+    const userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9)
+
+    // ユーザー作成
+    await db.prepare(
+      'INSERT INTO users (id, email, password_hash, username, email_verified) VALUES (?, ?, ?, ?, ?)'
+    ).bind(userId, email, passwordHash, username, 0).run()
+
+    // JWTトークン生成
+    const token = await generateToken(userId, JWT_SECRET)
+
+    // Cookieにトークンを保存（30日間、HttpOnly, Secure）
+    setCookie(c, 'auth_token', token, {
+      maxAge: 30 * 24 * 60 * 60, // 30日間
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Lax',
+      path: '/'
+    })
+
+    return c.json({
+      success: true,
+      user: {
+        id: userId,
+        email,
+        username
+      }
+    })
+
+  } catch (error) {
+    console.error('Register error:', error)
+    return c.json({ 
+      error: '登録処理に失敗しました',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: ログイン
+app.post('/api/auth/login', async (c) => {
+  try {
+    const db = c.env.DB
+    const body = await c.req.json()
+    const { email, password } = body
+
+    // バリデーション
+    if (!email || !password) {
+      return c.json({ error: 'メールアドレスとパスワードは必須です' }, 400)
+    }
+
+    // ユーザー検索
+    const user = await db.prepare(
+      'SELECT id, email, password_hash, username FROM users WHERE email = ?'
+    ).bind(email).first()
+
+    if (!user) {
+      return c.json({ error: 'メールアドレスまたはパスワードが正しくありません' }, 401)
+    }
+
+    // パスワード検証
+    const isValidPassword = await verifyPassword(password, user.password_hash as string)
+    if (!isValidPassword) {
+      return c.json({ error: 'メールアドレスまたはパスワードが正しくありません' }, 401)
+    }
+
+    // 最終アクティブ時刻を更新
+    await db.prepare(
+      'UPDATE users SET last_active_at = CURRENT_TIMESTAMP WHERE id = ?'
+    ).bind(user.id).run()
+
+    // JWTトークン生成
+    const token = await generateToken(user.id as string, JWT_SECRET)
+
+    // Cookieにトークンを保存
+    setCookie(c, 'auth_token', token, {
+      maxAge: 30 * 24 * 60 * 60, // 30日間
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Lax',
+      path: '/'
+    })
+
+    return c.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username
+      }
+    })
+
+  } catch (error) {
+    console.error('Login error:', error)
+    return c.json({ 
+      error: 'ログイン処理に失敗しました',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: ログアウト
+app.post('/api/auth/logout', (c) => {
+  deleteCookie(c, 'auth_token', {
+    path: '/'
+  })
+
+  return c.json({ success: true })
+})
+
+// API: 現在のユーザー情報取得
+app.get('/api/auth/me', async (c) => {
+  try {
+    const db = c.env.DB
+    const token = getCookie(c, 'auth_token')
+
+    if (!token) {
+      return c.json({ error: 'Not authenticated' }, 401)
+    }
+
+    // トークン検証
+    const payload = await verifyToken(token, JWT_SECRET)
+    if (!payload) {
+      return c.json({ error: 'Invalid token' }, 401)
+    }
+
+    // ユーザー情報取得
+    const user = await db.prepare(
+      'SELECT id, email, username, created_at FROM users WHERE id = ?'
+    ).bind(payload.userId).first()
+
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404)
+    }
+
+    return c.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        createdAt: user.created_at
+      }
+    })
+
+  } catch (error) {
+    console.error('Get user error:', error)
+    return c.json({ error: 'Failed to get user info' }, 500)
+  }
+})
+
+// ========================================
+// 管理者API
+// ========================================
 
 // API: 管理者統計データ
 app.get('/api/admin/stats', (c) => {
