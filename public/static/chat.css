@@ -10,7 +10,7 @@
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, var(--sakura-light) 0%, var(--sakura-pink) 100%);
-  padding-bottom: 70px; /* 下部ナビゲーション分 */
+  padding-bottom: 0; /* パディング削除（入力エリアとナビゲーションが固定のため） */
 }
 
 /* ========================================
@@ -83,10 +83,11 @@
   flex: 1;
   overflow-y: auto;
   padding: 20px;
+  padding-bottom: 20px;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  max-height: calc(100vh - 450px); /* ヘッダー + 入力エリア + ナビ */
+  margin-bottom: 170px; /* 入力エリア（80px） + ナビゲーション（90px） */
   scroll-behavior: smooth;
 }
 
@@ -206,7 +207,7 @@
    ======================================== */
 .chat-input-area {
   position: fixed;
-  bottom: 70px; /* 下部ナビゲーション分 */
+  bottom: 90px; /* 下部ナビゲーション分（70px + マージン20px） */
   left: 0;
   right: 0;
   padding: 15px 20px;
@@ -324,7 +325,8 @@
 
   .chat-messages {
     padding: 15px;
-    max-height: calc(100vh - 400px);
+    padding-bottom: 15px;
+    margin-bottom: 150px; /* モバイル用調整 */
   }
 
   .message-soulmate,
@@ -364,6 +366,6 @@
   }
 
   .chat-messages {
-    max-height: calc(100vh - 360px);
+    margin-bottom: 140px; /* 極小画面用調整 */
   }
 }
