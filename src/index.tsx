@@ -174,6 +174,80 @@ app.get('/generate', (c) => {
   )
 })
 
+// チャットページ
+app.get('/chat', (c) => {
+  return c.render(
+    <div class="chat-container">
+      {/* ソウルメイトヘッダー（固定） */}
+      <header class="chat-header">
+        <div class="soulmate-avatar-wrapper">
+          <img 
+            src="https://via.placeholder.com/200/FFB7C5/FFFFFF?text=🦊" 
+            alt="ソウルメイト" 
+            class="soulmate-avatar"
+            id="soulmateAvatar"
+          />
+        </div>
+        <h2 class="soulmate-name" id="soulmateName">ユキヒメ</h2>
+        <p class="soulmate-concept" id="soulmateConcept">星影のホッキョクオオカミ</p>
+        <div class="soulmate-status">
+          <span class="status-indicator">🟢</span>
+          <span class="status-text">オンライン</span>
+        </div>
+      </header>
+
+      {/* チャットメッセージエリア（スクロール可能） */}
+      <main class="chat-messages" id="chatMessages">
+        {/* 初期メッセージ */}
+        <div class="message-soulmate">
+          <div class="message-content">
+            <p>こんにちは！✨</p>
+            <p>私はあなたの守護動物、ユキヒメだよ。</p>
+            <p>何でも話してね🌸</p>
+          </div>
+          <div class="message-time">10:30</div>
+        </div>
+      </main>
+
+      {/* 入力エリア（固定） */}
+      <footer class="chat-input-area">
+        <input 
+          type="text" 
+          class="chat-input" 
+          id="chatInput"
+          placeholder="メッセージを入力..."
+          autocomplete="off"
+        />
+        <button class="chat-send-btn" id="chatSendBtn">
+          <span>📤</span>
+        </button>
+      </footer>
+
+      {/* 下部ナビゲーション */}
+      <nav class="bottom-nav">
+        <a href="/" class="nav-item">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">トップ</span>
+        </a>
+        <a href="/generate" class="nav-item">
+          <span class="nav-icon">✨</span>
+          <span class="nav-label">生成</span>
+        </a>
+        <a href="/chat" class="nav-item active">
+          <span class="nav-icon">💬</span>
+          <span class="nav-label">チャット</span>
+        </a>
+        <a href="/admin" class="nav-item">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">管理者</span>
+        </a>
+      </nav>
+
+      <script src="/static/chat.js"></script>
+    </div>
+  )
+})
+
 // 管理者ページ
 app.get('/admin', (c) => {
   return c.render(

@@ -9,6 +9,7 @@ export const renderer = jsxRenderer(({ children }) => {
         <title>Ramat - あなただけの守護動物</title>
         <link href="/static/style.css" rel="stylesheet" />
         <link href="/static/admin.css" rel="stylesheet" />
+        <link href="/static/chat.css" rel="stylesheet" />
       </head>
       <body>{children}</body>
     </html>
