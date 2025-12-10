@@ -9,18 +9,20 @@
   - モバイル最適化（レスポンシブ対応）
   - Gemini AIによる守護動物のプロフィールと画像の自動生成
   - **D1 Databaseによる永続的なデータ保存**
+  - **🔐 ログイン必須の会員制システム（JWT認証）**
 
 ## URLs
 - **Production**: https://ramat.pages.dev
-- **Latest Deploy**: https://47002ef9.ramat.pages.dev
+- **Latest Deploy**: https://925cc81b.ramat.pages.dev
 - **Sandbox Dev**: https://3000-i1w5j0r4k4fnfaobo1q5r-c07dda5e.sandbox.novita.ai
 
 ### ページ別URL
-- **ランディングページ**: https://ramat.pages.dev/
-- **生成ページ**: https://ramat.pages.dev/generate
-- **チャットページ**: https://ramat.pages.dev/chat
-- **マイページ**: https://ramat.pages.dev/mypage
-- **管理者ページ**: https://ramat.pages.dev/admin
+- **ログインページ**: https://ramat.pages.dev/login （🔐 最初にアクセスするページ）
+- **ランディングページ**: https://ramat.pages.dev/ （要ログイン）
+- **生成ページ**: https://ramat.pages.dev/generate （要ログイン）
+- **チャットページ**: https://ramat.pages.dev/chat （要ログイン）
+- **マイページ**: https://ramat.pages.dev/mypage （要ログイン）
+- **管理者ページ**: https://ramat.pages.dev/admin （要ログイン）
 
 ## 実装された機能
 
@@ -39,8 +41,21 @@
 - 動物75種類 × 名前100種類からランダム選択
 - REST API完全実装
 
-#### 3. **データベース（D1）**
-- **users** テーブル - ユーザー管理
+#### 3. **🔐 認証システム（完全実装）**
+- **ログイン必須**: すべてのページで認証が必要
+- **新規登録**: メールアドレス、ユーザー名、パスワード
+- **ログイン**: メールアドレスとパスワード
+- **JWT認証**: HTTP-only Cookieによるセキュアなセッション管理（30日間有効）
+- **パスワードハッシュ化**: SHA-256によるセキュアな保存
+- **認証ミドルウェア**: 未ログイン時は自動的に`/login`にリダイレクト
+- **バリデーション**: 
+  - メールアドレス形式チェック
+  - パスワード強度チェック（8文字以上、英数字含む）
+  - ユーザー名チェック（2-20文字）
+
+#### 4. **データベース（D1）**
+- **users** テーブル - ユーザー管理（認証情報含む）
+  - `id`, `email`, `password_hash`, `username`, `email_verified`
 - **soulmates** テーブル - 生成されたソウルメイト情報
 - **chat_messages** テーブル - チャット履歴
 - **user_stats** テーブル - ユーザー統計情報
@@ -97,6 +112,67 @@
 - **リアルタイム更新**: 30秒ごとに統計を自動更新
 
 ## API エンドポイント
+
+### 🔐 認証関連
+**POST /api/auth/register** - 新規登録
+- リクエスト:
+  ```json
+  {
+    "email": "example@mail.com",
+    "password": "password123",
+    "username": "ユーザー名"
+  }
+  ```
+- レスポンス:
+  ```json
+  {
+    "success": true,
+    "user": {
+      "id": "user_xxx",
+      "email": "example@mail.com",
+      "username": "ユーザー名"
+    }
+  }
+  ```
+- 自動的にJWTトークンがCookieに保存される
+
+**POST /api/auth/login** - ログイン
+- リクエスト:
+  ```json
+  {
+    "email": "example@mail.com",
+    "password": "password123"
+  }
+  ```
+- レスポンス:
+  ```json
+  {
+    "success": true,
+    "user": {
+      "id": "user_xxx",
+      "email": "example@mail.com",
+      "username": "ユーザー名"
+    }
+  }
+  ```
+
+**POST /api/auth/logout** - ログアウト
+- レスポンス: `{ "success": true }`
+- Cookieからトークンが削除される
+
+**GET /api/auth/me** - 現在のユーザー情報取得
+- レスポンス:
+  ```json
+  {
+    "success": true,
+    "user": {
+      "id": "user_xxx",
+      "email": "example@mail.com",
+      "username": "ユーザー名",
+      "createdAt": "2025-12-10T12:34:56.789Z"
+    }
+  }
+  ```
 
 ### 生成関連
 **POST /api/generate** - ソウルメイト生成（D1保存対応）
@@ -427,21 +503,30 @@ npx wrangler pages secret put GEMINI_API_KEY --project-name ramat
 ### ✅ バックエンド完全実装
 1. **D1 Database統合**
    - users, soulmates, chat_messages, user_stats テーブル作成
+   - 認証フィールド追加（email, password_hash, username, email_verified）
    - ローカル・本番マイグレーション完了
    - インデックス最適化
 
-2. **チャットAPI完全実装**
+2. **🔐 認証システム完全実装（NEW!）**
+   - JWT + HTTP-only Cookie によるセキュアな認証
+   - パスワードハッシュ化（SHA-256）
+   - ログイン/新規登録API
+   - 認証ミドルウェア（全ページでログイン必須）
+   - バリデーション（メール、パスワード、ユーザー名）
+
+3. **チャットAPI完全実装**
    - `/api/chat/send` エンドポイント
    - Gemini API統合（性格反映）
    - D1への会話履歴保存
    - 統計情報自動更新
 
-3. **マイページAPI完全実装**
+4. **マイページAPI完全実装**
    - `/api/mypage/profile/:userId` - プロフィール取得
    - `/api/mypage/stats/:userId` - 統計取得
    - `/api/mypage/history/:userId` - 履歴取得
 
-4. **フロントエンド統合**
+5. **フロントエンド統合**
+   - ログイン/新規登録ページUI（桜色グラデーション）
    - chat.js を実API接続に更新
    - mypage.js を実API接続に更新
    - app.js にuserID送信機能追加
@@ -453,7 +538,7 @@ npx wrangler pages secret put GEMINI_API_KEY --project-name ramat
 - ✅ Gemini API連携でチャット返信を生成
 - ✅ 生成結果の保存機能（D1 Database）
 - ✅ 会話履歴の保存
-- ⏳ ユーザー認証機能（今後実装）
+- ✅ **ユーザー認証機能（JWT + D1）**
 
 ### 中期（Phase 2）
 - お気に入り機能（UI準備済み、バックエンド未実装）
