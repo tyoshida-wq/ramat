@@ -63,9 +63,24 @@ app.get('/', (c) => {
         </div>
       </main>
 
-      <footer class="footer">
-        <p>© 2024 Ramat</p>
-      </footer>
+      <nav class="bottom-nav">
+        <a href="/" class="nav-item active">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">トップ</span>
+        </a>
+        <a href="/generate" class="nav-item">
+          <span class="nav-icon">✨</span>
+          <span class="nav-label">生成</span>
+        </a>
+        <a href="/chat" class="nav-item">
+          <span class="nav-icon">💬</span>
+          <span class="nav-label">チャット</span>
+        </a>
+        <a href="/admin" class="nav-item">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">管理者</span>
+        </a>
+      </nav>
 
       <script src="/static/app.js"></script>
     </div>
