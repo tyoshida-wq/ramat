@@ -1,7 +1,18 @@
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import { renderer } from './renderer'
+import { animals } from './data/animals'
+import { names } from './data/names'
+import { generateProfile, generateImage } from './services/gemini'
 
-const app = new Hono()
+type Bindings = {
+  GEMINI_API_KEY: string
+}
+
+const app = new Hono<{ Bindings: Bindings }>()
+
+// CORS設定
+app.use('/api/*', cors())
 
 app.use(renderer)
 
@@ -55,8 +66,54 @@ app.get('/', (c) => {
       <footer class="footer">
         <p>© 2024 Ramat</p>
       </footer>
+
+      <script src="/static/app.js"></script>
     </div>
   )
+})
+
+// API: ソウルメイト生成
+app.post('/api/generate', async (c) => {
+  try {
+    const apiKey = c.env.GEMINI_API_KEY
+    
+    if (!apiKey) {
+      return c.json({ error: 'API key not configured' }, 500)
+    }
+
+    // ランダムに動物と名前を選択
+    const randomAnimal = animals[Math.floor(Math.random() * animals.length)]
+    const randomName = names[Math.floor(Math.random() * names.length)]
+
+    console.log(`Selected: ${randomAnimal.en} (${randomAnimal.ja}) - ${randomName}`)
+
+    // ステップ1: プロフィール生成
+    const profile = await generateProfile(
+      randomAnimal.en,
+      randomName,
+      apiKey
+    )
+
+    console.log('Profile generated:', profile)
+
+    // ステップ2: 画像生成
+    const imageDataUrl = await generateImage(profile.imagePrompt, apiKey)
+
+    return c.json({
+      success: true,
+      animal: randomAnimal,
+      profile: {
+        ...profile,
+        image: imageDataUrl,
+      }
+    })
+  } catch (error) {
+    console.error('Generation error:', error)
+    return c.json({ 
+      error: 'Failed to generate soulmate',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
 })
 
 export default app
