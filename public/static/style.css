@@ -1,1 +1,404 @@
-h1 { font-family: Arial, Helvetica, sans-serif; }
+/* ========================================
+   リセット & ベーススタイル
+   ======================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* 桜色グラデーションカラー */
+  --sakura-light: #FFE4E1;
+  --sakura-pink: #FFB7C5;
+  --sakura-rose: #FF9EB5;
+  --sakura-deep: #FF85A1;
+  --sakura-accent: #FF6B9D;
+  
+  /* テキストカラー */
+  --text-primary: #5A5A5A;
+  --text-secondary: #8A8A8A;
+  --text-white: #FFFFFF;
+  
+  /* シャドウ */
+  --shadow-soft: 0 4px 20px rgba(255, 107, 157, 0.15);
+  --shadow-medium: 0 8px 30px rgba(255, 107, 157, 0.25);
+  --shadow-strong: 0 12px 40px rgba(255, 107, 157, 0.35);
+}
+
+body {
+  font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 
+               'Meiryo', sans-serif;
+  background: linear-gradient(135deg, var(--sakura-light) 0%, var(--sakura-pink) 100%);
+  min-height: 100vh;
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ========================================
+   コンテナ
+   ======================================== */
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========================================
+   ヘッダー
+   ======================================== */
+.header {
+  text-align: center;
+  padding: 40px 20px 30px;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--sakura-accent) 0%, var(--sakura-deep) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 10px rgba(255, 107, 157, 0.3);
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+/* ========================================
+   メインエリア
+   ======================================== */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  animation: fadeIn 1s ease-out 0.3s backwards;
+}
+
+/* ========================================
+   カード
+   ======================================== */
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 30px;
+  padding: 40px 30px;
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+.card-content {
+  text-align: center;
+}
+
+.description {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 35px;
+  line-height: 1.8;
+}
+
+/* ========================================
+   生成ボタン
+   ======================================== */
+.generate-btn {
+  background: linear-gradient(135deg, var(--sakura-accent) 0%, var(--sakura-rose) 100%);
+  color: var(--text-white);
+  border: none;
+  border-radius: 50px;
+  padding: 18px 50px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-medium);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.generate-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.generate-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-strong);
+}
+
+.generate-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.generate-btn:active {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-icon {
+  font-size: 1.5rem;
+  animation: pulse 2s infinite;
+}
+
+.btn-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* ========================================
+   結果表示エリア
+   ======================================== */
+.result-area {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.result-card {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 30px;
+  padding: 30px;
+  box-shadow: var(--shadow-medium);
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.image-container {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--sakura-light) 0%, var(--sakura-pink) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 107, 157, 0.2);
+  border-top-color: var(--sakura-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* ========================================
+   プロフィール
+   ======================================== */
+.profile-container {
+  padding: 10px;
+}
+
+.profile-name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--sakura-accent);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.profile-concept {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 25px;
+  font-style: italic;
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detail-section {
+  background: linear-gradient(135deg, var(--sakura-light) 0%, rgba(255, 228, 225, 0.5) 100%);
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.detail-section h3 {
+  font-size: 1rem;
+  color: var(--sakura-accent);
+  margin-bottom: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-section h3::before {
+  content: '•';
+  font-size: 1.5rem;
+}
+
+.detail-section p {
+  font-size: 1rem;
+  color: var(--text-primary);
+  line-height: 1.7;
+}
+
+/* ========================================
+   フッター
+   ======================================== */
+.footer {
+  text-align: center;
+  padding: 30px 20px 20px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-top: auto;
+}
+
+/* ========================================
+   アニメーション
+   ======================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================
+   レスポンシブ対応
+   ======================================== */
+@media (max-width: 480px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .header {
+    padding: 30px 15px 20px;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .card {
+    padding: 30px 20px;
+    border-radius: 25px;
+  }
+  
+  .description {
+    font-size: 1rem;
+  }
+  
+  .generate-btn {
+    padding: 16px 40px;
+    font-size: 1.1rem;
+  }
+  
+  .result-card {
+    padding: 20px;
+    border-radius: 25px;
+  }
+  
+  .profile-name {
+    font-size: 1.75rem;
+  }
+  
+  .profile-concept {
+    font-size: 1rem;
+  }
+  
+  .detail-section {
+    padding: 15px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 40px 20px;
+  }
+  
+  .header {
+    padding: 60px 20px 40px;
+  }
+  
+  .title {
+    font-size: 3rem;
+  }
+  
+  .card {
+    padding: 50px 40px;
+  }
+}
