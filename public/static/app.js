@@ -5,6 +5,16 @@ const resultArea = document.getElementById('resultArea');
 const imageContainer = document.getElementById('imageContainer');
 const profileContainer = document.getElementById('profileContainer');
 
+// ユーザーIDを取得する関数（chat.js, mypage.jsと共通）
+function getUserId() {
+  let userId = localStorage.getItem('ramat_user_id');
+  if (!userId) {
+    userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    localStorage.setItem('ramat_user_id', userId);
+  }
+  return userId;
+}
+
 // ボタンクリックハンドラー
 generateBtn.addEventListener('click', async () => {
   try {
@@ -21,12 +31,16 @@ generateBtn.addEventListener('click', async () => {
     // スムーズにスクロール
     resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+    // ユーザーIDを取得
+    const userId = getUserId();
+
     // API呼び出し
     const response = await fetch('/api/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ userId })
     });
 
     if (!response.ok) {
@@ -58,6 +72,19 @@ generateBtn.addEventListener('click', async () => {
         </div>
       </div>
     `;
+
+    // LocalStorageにプロフィールを保存
+    const profileData = {
+      name: data.profile.name,
+      concept: data.profile.concept,
+      personality: data.profile.personality,
+      tone: data.profile.tone,
+      animal: data.animal.ja,
+      image: data.profile.image,
+      createdAt: new Date().toISOString()
+    };
+    localStorage.setItem('soulmateProfile', JSON.stringify(profileData));
+    console.log('✅ ソウルメイト情報をLocalStorageに保存しました');
 
     // スムーズにスクロール（完成した結果へ）
     setTimeout(() => {

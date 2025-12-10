@@ -7,6 +7,7 @@ import { generateProfile, generateImage } from './services/gemini'
 
 type Bindings = {
   GEMINI_API_KEY: string
+  DB: D1Database
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -585,10 +586,14 @@ app.get('/admin', (c) => {
 app.post('/api/generate', async (c) => {
   try {
     const apiKey = c.env.GEMINI_API_KEY
+    const db = c.env.DB
     
     if (!apiKey) {
       return c.json({ error: 'API key not configured' }, 500)
     }
+
+    const body = await c.req.json()
+    const { userId } = body
 
     // ランダムに動物と名前を選択
     const randomAnimal = animals[Math.floor(Math.random() * animals.length)]
@@ -608,6 +613,40 @@ app.post('/api/generate', async (c) => {
     // ステップ2: 画像生成
     const imageDataUrl = await generateImage(profile.imagePrompt, apiKey)
 
+    // D1データベースに保存（userIdがある場合）
+    if (userId && db) {
+      try {
+        // ユーザー存在確認・作成
+        const user = await db.prepare('SELECT * FROM users WHERE id = ?')
+          .bind(userId)
+          .first()
+
+        if (!user) {
+          await db.prepare('INSERT INTO users (id) VALUES (?)')
+            .bind(userId)
+            .run()
+        }
+
+        // ソウルメイト保存
+        await db.prepare(
+          'INSERT INTO soulmates (user_id, name, concept, personality, tone, animal, image_base64) VALUES (?, ?, ?, ?, ?, ?, ?)'
+        ).bind(
+          userId,
+          profile.name,
+          profile.concept,
+          profile.personality,
+          profile.tone,
+          randomAnimal.ja,
+          imageDataUrl
+        ).run()
+
+        console.log('Soulmate saved to database')
+      } catch (dbError) {
+        console.error('Database save error:', dbError)
+        // エラーが発生してもレスポンスは返す
+      }
+    }
+
     return c.json({
       success: true,
       animal: randomAnimal,
@@ -620,6 +659,385 @@ app.post('/api/generate', async (c) => {
     console.error('Generation error:', error)
     return c.json({ 
       error: 'Failed to generate soulmate',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: チャットメッセージ送信（D1統合版）
+app.post('/api/chat/send', async (c) => {
+  try {
+    const apiKey = c.env.GEMINI_API_KEY
+    const db = c.env.DB
+    
+    if (!apiKey) {
+      return c.json({ error: 'API key not configured' }, 500)
+    }
+
+    const body = await c.req.json()
+    const { userId, message } = body
+
+    if (!userId || !message) {
+      return c.json({ error: 'userId and message are required' }, 400)
+    }
+
+    // ユーザー存在確認・作成
+    let user = await db.prepare('SELECT * FROM users WHERE id = ?')
+      .bind(userId)
+      .first()
+
+    if (!user) {
+      await db.prepare('INSERT INTO users (id) VALUES (?)')
+        .bind(userId)
+        .run()
+    } else {
+      // 最終アクティブ時刻更新
+      await db.prepare('UPDATE users SET last_active_at = CURRENT_TIMESTAMP WHERE id = ?')
+        .bind(userId)
+        .run()
+    }
+
+    // ソウルメイト情報取得
+    const soulmate = await db.prepare(
+      'SELECT * FROM soulmates WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+    ).bind(userId).first()
+
+    if (!soulmate) {
+      return c.json({ error: 'Soulmate not found. Please generate one first.' }, 404)
+    }
+
+    // ユーザーメッセージをDBに保存
+    await db.prepare(
+      'INSERT INTO chat_messages (user_id, soulmate_id, sender, message) VALUES (?, ?, ?, ?)'
+    ).bind(userId, soulmate.id, 'user', message).run()
+
+    // 性格情報取得
+    const personality = soulmate.personality || '優しく穏やかな性格'
+    const tone = soulmate.tone || '柔らかく温かい口調'
+    const name = soulmate.name || 'ソウルメイト'
+    const concept = soulmate.concept || '守護動物'
+
+    // Gemini APIでソウルメイトの返信を生成
+    const systemPrompt = `あなたは「${name}」という名前の守護動物です。
+コンセプト: ${concept}
+性格: ${personality}
+口調: ${tone}
+
+以下のガイドラインに従って、ユーザーのメッセージに返信してください：
+1. ${name}として、性格と口調を忠実に再現してください
+2. ユーザーの気持ちに寄り添い、温かく励ます返信を心がけてください
+3. 簡潔に、2〜3文程度で返信してください
+4. 絵文字を適度に使用してください（✨🌸💕など）
+5. キャラクターの一人称は使わず、自然な会話を心がけてください`
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `${systemPrompt}\n\nユーザーのメッセージ: ${message}\n\nあなたの返信:`
+            }]
+          }],
+          generationConfig: {
+            temperature: 1.2,
+            maxOutputTokens: 200,
+            topP: 0.95,
+            topK: 40
+          }
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Gemini API error:', errorText)
+      return c.json({ error: 'Failed to generate response' }, 500)
+    }
+
+    const data = await response.json()
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text
+
+    if (!reply) {
+      return c.json({ error: 'No response generated' }, 500)
+    }
+
+    // ソウルメイトの返信をDBに保存
+    await db.prepare(
+      'INSERT INTO chat_messages (user_id, soulmate_id, sender, message) VALUES (?, ?, ?, ?)'
+    ).bind(userId, soulmate.id, 'soulmate', reply.trim()).run()
+
+    // 統計情報更新
+    const stats = await db.prepare('SELECT * FROM user_stats WHERE user_id = ?')
+      .bind(userId)
+      .first()
+
+    if (!stats) {
+      await db.prepare(
+        'INSERT INTO user_stats (user_id, total_messages, total_conversations) VALUES (?, ?, ?)'
+      ).bind(userId, 2, 1).run()
+    } else {
+      await db.prepare(
+        'UPDATE user_stats SET total_messages = total_messages + 2, last_updated_at = CURRENT_TIMESTAMP WHERE user_id = ?'
+      ).bind(userId).run()
+    }
+
+    return c.json({
+      success: true,
+      reply: reply.trim(),
+      timestamp: new Date().toISOString()
+    })
+
+  } catch (error) {
+    console.error('Chat API error:', error)
+    return c.json({ 
+      error: 'Failed to process message',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: チャットメッセージ送信（旧版・互換性維持）
+app.post('/api/chat/message', async (c) => {
+  try {
+    const apiKey = c.env.GEMINI_API_KEY
+    
+    if (!apiKey) {
+      return c.json({ error: 'API key not configured' }, 500)
+    }
+
+    const body = await c.req.json()
+    const { message, soulmateProfile } = body
+
+    if (!message) {
+      return c.json({ error: 'Message is required' }, 400)
+    }
+
+    // ソウルメイトの性格情報を取得
+    const personality = soulmateProfile?.personality || '優しく穏やかな性格'
+    const tone = soulmateProfile?.tone || '柔らかく温かい口調'
+    const name = soulmateProfile?.name || 'ソウルメイト'
+    const concept = soulmateProfile?.concept || '守護動物'
+
+    // Gemini APIでソウルメイトの返信を生成
+    const systemPrompt = `あなたは「${name}」という名前の守護動物です。
+コンセプト: ${concept}
+性格: ${personality}
+口調: ${tone}
+
+以下のガイドラインに従って、ユーザーのメッセージに返信してください：
+1. ${name}として、性格と口調を忠実に再現してください
+2. ユーザーの気持ちに寄り添い、温かく励ます返信を心がけてください
+3. 簡潔に、2〜3文程度で返信してください
+4. 絵文字を適度に使用してください（✨🌸💕など）
+5. キャラクターの一人称は使わず、自然な会話を心がけてください`
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `${systemPrompt}\n\nユーザーのメッセージ: ${message}\n\nあなたの返信:`
+            }]
+          }],
+          generationConfig: {
+            temperature: 1.2,
+            maxOutputTokens: 200,
+            topP: 0.95,
+            topK: 40
+          }
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Gemini API error:', errorText)
+      return c.json({ error: 'Failed to generate response' }, 500)
+    }
+
+    const data = await response.json()
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text
+
+    if (!reply) {
+      return c.json({ error: 'No response generated' }, 500)
+    }
+
+    return c.json({
+      success: true,
+      reply: reply.trim(),
+      timestamp: new Date().toISOString()
+    })
+
+  } catch (error) {
+    console.error('Chat API error:', error)
+    return c.json({ 
+      error: 'Failed to process message',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: マイページ - プロフィール取得
+app.get('/api/mypage/profile/:userId', async (c) => {
+  try {
+    const db = c.env.DB
+    const userId = c.req.param('userId')
+
+    // ソウルメイト情報取得
+    const soulmate = await db.prepare(
+      'SELECT * FROM soulmates WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+    ).bind(userId).first()
+
+    if (!soulmate) {
+      return c.json({ error: 'Soulmate not found' }, 404)
+    }
+
+    return c.json({
+      success: true,
+      profile: {
+        name: soulmate.name,
+        concept: soulmate.concept,
+        personality: soulmate.personality,
+        tone: soulmate.tone,
+        animal: soulmate.animal,
+        image: soulmate.image_base64,
+        createdAt: soulmate.created_at
+      }
+    })
+
+  } catch (error) {
+    console.error('MyPage profile API error:', error)
+    return c.json({ 
+      error: 'Failed to fetch profile',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: マイページ - 統計情報取得
+app.get('/api/mypage/stats/:userId', async (c) => {
+  try {
+    const db = c.env.DB
+    const userId = c.req.param('userId')
+
+    // 統計情報取得
+    const stats = await db.prepare('SELECT * FROM user_stats WHERE user_id = ?')
+      .bind(userId)
+      .first()
+
+    // ソウルメイト生成日取得
+    const soulmate = await db.prepare(
+      'SELECT created_at FROM soulmates WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+    ).bind(userId).first()
+
+    // 出会った日数を計算
+    let daysSince = 1
+    if (soulmate?.created_at) {
+      const created = new Date(soulmate.created_at)
+      const now = new Date()
+      const diffTime = Math.abs(now.getTime() - created.getTime())
+      daysSince = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)))
+    }
+
+    // 最終チャット日時取得
+    const lastMessage = await db.prepare(
+      'SELECT created_at FROM chat_messages WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+    ).bind(userId).first()
+
+    return c.json({
+      success: true,
+      stats: {
+        totalMessages: stats?.total_messages || 0,
+        totalConversations: stats?.total_conversations || 0,
+        favoriteCount: stats?.favorite_count || 0,
+        daysSince,
+        lastChatDate: lastMessage?.created_at || null
+      }
+    })
+
+  } catch (error) {
+    console.error('MyPage stats API error:', error)
+    return c.json({ 
+      error: 'Failed to fetch statistics',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: マイページ - チャット履歴取得
+app.get('/api/mypage/history/:userId', async (c) => {
+  try {
+    const db = c.env.DB
+    const userId = c.req.param('userId')
+    const limit = parseInt(c.req.query('limit') || '50')
+
+    // チャット履歴取得
+    const messages = await db.prepare(
+      'SELECT * FROM chat_messages WHERE user_id = ? ORDER BY created_at DESC LIMIT ?'
+    ).bind(userId, limit).all()
+
+    return c.json({
+      success: true,
+      history: messages.results || []
+    })
+
+  } catch (error) {
+    console.error('MyPage history API error:', error)
+    return c.json({ 
+      error: 'Failed to fetch chat history',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: マイページ統計データ取得（旧版・互換性維持）
+app.post('/api/mypage/stats', async (c) => {
+  try {
+    // クライアントから送られたデータを取得
+    const body = await c.req.json()
+    const { chatHistory, soulmateProfile } = body
+
+    // 統計データを計算
+    const messageCount = Array.isArray(chatHistory) ? chatHistory.length : 0
+    
+    // 出会った日数を計算
+    let daysSince = 1
+    if (soulmateProfile?.createdAt) {
+      const created = new Date(soulmateProfile.createdAt)
+      const now = new Date()
+      const diffTime = Math.abs(now.getTime() - created.getTime())
+      daysSince = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    }
+
+    // お気に入り数（将来実装）
+    const favoriteCount = 0
+
+    return c.json({
+      success: true,
+      stats: {
+        messageCount,
+        daysSince,
+        favoriteCount,
+        lastChatDate: chatHistory && chatHistory.length > 0 
+          ? chatHistory[chatHistory.length - 1]?.timestamp 
+          : null
+      }
+    })
+
+  } catch (error) {
+    console.error('MyPage stats API error:', error)
+    return c.json({ 
+      error: 'Failed to calculate statistics',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, 500)
   }

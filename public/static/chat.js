@@ -104,7 +104,17 @@ function generateSoulmateReply(userMessage) {
   return replies[Math.floor(Math.random() * replies.length)];
 }
 
-// メッセージ送信処理
+// ユーザーIDを生成または取得する関数
+function getUserId() {
+  let userId = localStorage.getItem('ramat_user_id');
+  if (!userId) {
+    userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    localStorage.setItem('ramat_user_id', userId);
+  }
+  return userId;
+}
+
+// メッセージ送信処理（実API接続版）
 async function sendMessage() {
   const message = chatInput.value.trim();
   
@@ -124,22 +134,77 @@ async function sendMessage() {
   // タイピングインジケーターを表示
   showTypingIndicator();
   
-  // 1〜2秒待機（AI応答のシミュレーション）
-  const delay = 1000 + Math.random() * 1000;
-  await new Promise(resolve => setTimeout(resolve, delay));
-  
-  // タイピングインジケーターを削除
-  hideTypingIndicator();
-  
-  // ソウルメイトの返信を追加
-  const reply = generateSoulmateReply(message);
-  addMessage(reply, false);
-  
-  // 送信ボタンを再度有効化
-  chatSendBtn.disabled = false;
-  
-  // 入力フィールドにフォーカス
-  chatInput.focus();
+  try {
+    // 実APIにリクエスト送信
+    const userId = getUserId();
+    const response = await fetch('/api/chat/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: userId,
+        message: message
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('API request failed');
+    }
+
+    const data = await response.json();
+    
+    // タイピングインジケーターを削除
+    hideTypingIndicator();
+    
+    // ソウルメイトの返信を追加
+    if (data.success && data.reply) {
+      addMessage(data.reply, false);
+      
+      // チャット履歴をLocalStorageに保存（バックアップ用）
+      saveMessageToLocalStorage(message, data.reply);
+    } else {
+      throw new Error('Invalid response');
+    }
+    
+  } catch (error) {
+    console.error('チャット送信エラー:', error);
+    
+    // タイピングインジケーターを削除
+    hideTypingIndicator();
+    
+    // エラー時はモック返信にフォールバック
+    const reply = generateSoulmateReply(message);
+    addMessage(reply, false);
+    
+    // エラーメッセージを表示
+    addMessage('⚠️ 通信エラーが発生しました。オフラインモードで動作しています。', false);
+  } finally {
+    // 送信ボタンを再度有効化
+    chatSendBtn.disabled = false;
+    
+    // 入力フィールドにフォーカス
+    chatInput.focus();
+  }
+}
+
+// チャット履歴をLocalStorageに保存する関数
+function saveMessageToLocalStorage(userMessage, soulmateReply) {
+  try {
+    const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+    history.push({
+      user: userMessage,
+      soulmate: soulmateReply,
+      timestamp: new Date().toISOString()
+    });
+    // 最新100件のみ保持
+    if (history.length > 100) {
+      history.shift();
+    }
+    localStorage.setItem('chatHistory', JSON.stringify(history));
+  } catch (error) {
+    console.error('履歴保存エラー:', error);
+  }
 }
 
 // イベントリスナーの設定
@@ -155,32 +220,55 @@ chatInput.addEventListener('keypress', (e) => {
 // 初期化時に最新メッセージまでスクロール
 scrollToBottom();
 
-// localStorage からソウルメイトの情報を読み込む（将来の実装用）
-function loadSoulmateInfo() {
+// ソウルメイトの情報を読み込む（API + LocalStorage併用）
+async function loadSoulmateInfo() {
   try {
+    const userId = getUserId();
+    
+    // まずLocalStorageから読み込み（即座に表示）
     const savedProfile = localStorage.getItem('soulmateProfile');
     if (savedProfile) {
       const profile = JSON.parse(savedProfile);
-      
-      // ヘッダー情報を更新
-      const nameElement = document.getElementById('soulmateName');
-      const conceptElement = document.getElementById('soulmateConcept');
-      const avatarElement = document.getElementById('soulmateAvatar');
-      
-      if (nameElement && profile.name) {
-        nameElement.textContent = profile.name;
-      }
-      
-      if (conceptElement && profile.concept) {
-        conceptElement.textContent = profile.concept;
-      }
-      
-      if (avatarElement && profile.image) {
-        avatarElement.src = profile.image;
-      }
+      updateSoulmateUI(profile);
     }
+    
+    // APIから最新情報を取得
+    try {
+      const response = await fetch(`/api/mypage/profile/${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.profile) {
+          // UIを更新
+          updateSoulmateUI(data.profile);
+          // LocalStorageも更新
+          localStorage.setItem('soulmateProfile', JSON.stringify(data.profile));
+        }
+      }
+    } catch (apiError) {
+      console.log('API呼び出し失敗、LocalStorageのデータを使用:', apiError);
+    }
+    
   } catch (error) {
     console.log('ソウルメイト情報の読み込みに失敗しました:', error);
+  }
+}
+
+// ソウルメイトのUIを更新する関数
+function updateSoulmateUI(profile) {
+  const nameElement = document.getElementById('soulmateName');
+  const conceptElement = document.getElementById('soulmateConcept');
+  const avatarElement = document.getElementById('soulmateAvatar');
+  
+  if (nameElement && profile.name) {
+    nameElement.textContent = profile.name;
+  }
+  
+  if (conceptElement && profile.concept) {
+    conceptElement.textContent = profile.concept;
+  }
+  
+  if (avatarElement && profile.image) {
+    avatarElement.src = profile.image;
   }
 }
 

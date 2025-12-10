@@ -6,7 +6,11 @@
     "build": "vite build",
     "preview": "wrangler pages dev",
     "deploy": "npm run build && wrangler pages deploy",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "db:migrate:local": "wrangler d1 migrations apply ramat-production --local",
+    "db:migrate:prod": "wrangler d1 migrations apply ramat-production",
+    "db:console:local": "wrangler d1 execute ramat-production --local",
+    "db:console:prod": "wrangler d1 execute ramat-production"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

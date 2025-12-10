@@ -1,111 +1,157 @@
 // マイページのJavaScript
 
-// LocalStorageからソウルメイト情報を読み込む
-function loadSoulmateProfile() {
+// ユーザーIDを取得する関数（chat.jsと共通）
+function getUserId() {
+  let userId = localStorage.getItem('ramat_user_id');
+  if (!userId) {
+    userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    localStorage.setItem('ramat_user_id', userId);
+  }
+  return userId;
+}
+
+// ソウルメイト情報を読み込む（API + LocalStorage併用）
+async function loadSoulmateProfile() {
   try {
-    const savedProfile = localStorage.getItem('soulmateProfile');
+    const userId = getUserId();
     
+    // まずLocalStorageから読み込み（即座に表示）
+    const savedProfile = localStorage.getItem('soulmateProfile');
     if (savedProfile) {
       const profile = JSON.parse(savedProfile);
-      
-      // 画像
-      const profileImage = document.getElementById('profileImage');
-      if (profileImage && profile.image) {
-        profileImage.src = profile.image;
-      }
-      
-      // 名前
-      const profileName = document.getElementById('profileName');
-      if (profileName && profile.name) {
-        profileName.textContent = profile.name;
-      }
-      
-      // コンセプト
-      const profileConcept = document.getElementById('profileConcept');
-      if (profileConcept && profile.concept) {
-        profileConcept.textContent = profile.concept;
-      }
-      
-      // 動物種類
-      const profileAnimal = document.getElementById('profileAnimal');
-      if (profileAnimal && profile.animal) {
-        profileAnimal.textContent = profile.animal.ja || profile.animal;
-      }
-      
-      // 生成日
-      const profileDate = document.getElementById('profileDate');
-      if (profileDate) {
-        const createdDate = profile.createdAt || new Date().toISOString();
-        const date = new Date(createdDate);
-        profileDate.textContent = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
-        
-        // 出会った日数を計算
-        calculateDaysSince(createdDate);
-      }
-      
-      console.log('✅ ソウルメイト情報を読み込みました');
-    } else {
-      console.log('⚠️ ソウルメイト情報が見つかりません');
-      showNoProfileMessage();
+      updateProfileUI(profile);
     }
+    
+    // APIから最新情報を取得
+    try {
+      const response = await fetch(`/api/mypage/profile/${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.profile) {
+          updateProfileUI(data.profile);
+          // LocalStorageも更新
+          localStorage.setItem('soulmateProfile', JSON.stringify(data.profile));
+        }
+      } else if (response.status === 404) {
+        // ソウルメイトが見つからない
+        showNoProfileMessage();
+      }
+    } catch (apiError) {
+      console.log('API呼び出し失敗、LocalStorageのデータを使用:', apiError);
+      if (!savedProfile) {
+        showNoProfileMessage();
+      }
+    }
+    
   } catch (error) {
     console.error('❌ ソウルメイト情報の読み込みに失敗:', error);
     showNoProfileMessage();
   }
 }
 
-// 出会った日数を計算
-function calculateDaysSince(createdDate) {
-  const daysCount = document.getElementById('daysCount');
-  const statDays = document.getElementById('statDays');
-  
-  if (!createdDate) {
-    if (daysCount) daysCount.textContent = '1';
-    if (statDays) statDays.textContent = '1';
-    return;
+// プロフィールUIを更新する関数
+function updateProfileUI(profile) {
+  // 画像
+  const profileImage = document.getElementById('profileImage');
+  if (profileImage && profile.image) {
+    profileImage.src = profile.image;
   }
   
-  const created = new Date(createdDate);
-  const now = new Date();
-  const diffTime = Math.abs(now - created);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  if (daysCount) {
-    daysCount.textContent = diffDays;
+  // 名前
+  const profileName = document.getElementById('profileName');
+  if (profileName && profile.name) {
+    profileName.textContent = profile.name;
   }
   
-  if (statDays) {
-    statDays.textContent = diffDays;
+  // コンセプト
+  const profileConcept = document.getElementById('profileConcept');
+  if (profileConcept && profile.concept) {
+    profileConcept.textContent = profile.concept;
   }
+  
+  // 動物種類
+  const profileAnimal = document.getElementById('profileAnimal');
+  if (profileAnimal && profile.animal) {
+    profileAnimal.textContent = profile.animal;
+  }
+  
+  // 生成日
+  const profileDate = document.getElementById('profileDate');
+  if (profileDate && profile.createdAt) {
+    const date = new Date(profile.createdAt);
+    profileDate.textContent = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+  }
+  
+  console.log('✅ ソウルメイト情報を読み込みました');
 }
 
-// 統計情報を読み込む
-function loadStatistics() {
+// 統計情報を読み込む（API + LocalStorage併用）
+async function loadStatistics() {
   try {
-    // 会話数（LocalStorageから取得）
-    const chatHistory = localStorage.getItem('chatHistory');
-    let messageCount = 0;
+    const userId = getUserId();
     
+    // まずLocalStorageから読み込み（即座に表示）
+    const chatHistory = localStorage.getItem('chatHistory');
+    let localMessageCount = 0;
     if (chatHistory) {
       const history = JSON.parse(chatHistory);
-      messageCount = Array.isArray(history) ? history.length : 0;
+      localMessageCount = Array.isArray(history) ? history.length : 0;
     }
     
-    const statMessages = document.getElementById('statMessages');
-    if (statMessages) {
-      statMessages.textContent = messageCount;
+    // UIに反映
+    updateStatsUI({
+      totalMessages: localMessageCount,
+      totalConversations: 0,
+      favoriteCount: 0,
+      daysSince: 1
+    });
+    
+    // APIから最新統計を取得
+    try {
+      const response = await fetch(`/api/mypage/stats/${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.stats) {
+          updateStatsUI(data.stats);
+        }
+      }
+    } catch (apiError) {
+      console.log('統計API呼び出し失敗、LocalStorageのデータを使用:', apiError);
     }
     
-    // お気に入り数（将来実装）
-    const statFavorites = document.getElementById('statFavorites');
-    if (statFavorites) {
-      statFavorites.textContent = '0';
-    }
-    
-    console.log(`📊 統計: ${messageCount}件の会話`);
   } catch (error) {
     console.error('統計情報の読み込みに失敗:', error);
   }
+}
+
+// 統計UIを更新する関数
+function updateStatsUI(stats) {
+  // 会話数
+  const statMessages = document.getElementById('statMessages');
+  if (statMessages) {
+    statMessages.textContent = stats.totalMessages || 0;
+  }
+  
+  // お気に入り数
+  const statFavorites = document.getElementById('statFavorites');
+  if (statFavorites) {
+    statFavorites.textContent = stats.favoriteCount || 0;
+  }
+  
+  // 出会った日数
+  const daysCount = document.getElementById('daysCount');
+  const statDays = document.getElementById('statDays');
+  const daysSince = stats.daysSince || 1;
+  
+  if (daysCount) {
+    daysCount.textContent = daysSince;
+  }
+  
+  if (statDays) {
+    statDays.textContent = daysSince;
+  }
+  
+  console.log(`📊 統計: ${stats.totalMessages || 0}件の会話, ${daysSince}日`);
 }
 
 // プロフィールがない場合のメッセージ表示
@@ -159,8 +205,8 @@ function setupSettingsHandlers() {
   // データエクスポート
   const exportData = document.getElementById('exportData');
   if (exportData) {
-    exportData.addEventListener('click', () => {
-      exportUserData();
+    exportData.addEventListener('click', async () => {
+      await exportUserData();
     });
   }
   
@@ -173,17 +219,53 @@ function setupSettingsHandlers() {
   }
 }
 
-// データエクスポート機能
-function exportUserData() {
+// データエクスポート機能（API統合版）
+async function exportUserData() {
   try {
+    const userId = getUserId();
+    
+    // LocalStorageデータを取得
     const soulmateProfile = localStorage.getItem('soulmateProfile');
     const chatHistory = localStorage.getItem('chatHistory');
     
+    // APIから最新データを取得
+    let apiProfile = null;
+    let apiHistory = [];
+    let apiStats = null;
+    
+    try {
+      // プロフィール取得
+      const profileResponse = await fetch(`/api/mypage/profile/${userId}`);
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        apiProfile = profileData.profile;
+      }
+      
+      // 履歴取得
+      const historyResponse = await fetch(`/api/mypage/history/${userId}?limit=1000`);
+      if (historyResponse.ok) {
+        const historyData = await historyResponse.json();
+        apiHistory = historyData.history;
+      }
+      
+      // 統計取得
+      const statsResponse = await fetch(`/api/mypage/stats/${userId}`);
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        apiStats = statsData.stats;
+      }
+    } catch (apiError) {
+      console.log('API呼び出しエラー（一部データのみエクスポート）:', apiError);
+    }
+    
     const exportData = {
       exportDate: new Date().toISOString(),
-      soulmateProfile: soulmateProfile ? JSON.parse(soulmateProfile) : null,
-      chatHistory: chatHistory ? JSON.parse(chatHistory) : [],
-      version: '1.0'
+      userId: userId,
+      soulmateProfile: apiProfile || (soulmateProfile ? JSON.parse(soulmateProfile) : null),
+      chatHistory: apiHistory.length > 0 ? apiHistory : (chatHistory ? JSON.parse(chatHistory) : []),
+      statistics: apiStats,
+      version: '2.0',
+      source: 'Ramat Web App'
     };
     
     const dataStr = JSON.stringify(exportData, null, 2);
@@ -196,6 +278,7 @@ function exportUserData() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
     
     alert('💾 データをエクスポートしました\n\nダウンロードフォルダを確認してください。');
   } catch (error) {
@@ -228,8 +311,13 @@ function confirmDeleteData() {
 // すべてのデータを削除
 function deleteAllData() {
   try {
+    // LocalStorageをクリア
     localStorage.removeItem('soulmateProfile');
     localStorage.removeItem('chatHistory');
+    localStorage.removeItem('ramat_user_id'); // ユーザーIDもクリア
+    
+    // TODO: 将来的にはAPIでサーバー側のデータも削除
+    // DELETE /api/mypage/user/:userId
     
     alert('🗑️ すべてのデータを削除しました\n\nページをリロードします。');
     window.location.reload();
