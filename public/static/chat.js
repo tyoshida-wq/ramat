@@ -302,34 +302,44 @@ function customizeWelcomeMessage() {
 // カスタマイズを実行
 customizeWelcomeMessage();
 
-// スクロール時のヘッダー縮小機能
+// スクロール時のヘッダー縮小機能（修正版）
+// メッセージエリアが一定量溜まったら縮小
 const chatHeader = document.getElementById('chatHeader');
-const scrollThreshold = 50; // スクロール閾値（px）
+let isHeaderScrolled = false; // 状態管理フラグ
 
-function handleScroll() {
-  const scrollPosition = window.scrollY || window.pageYOffset;
+// メッセージ数が一定数を超えたらヘッダーを縮小
+function checkHeaderState() {
+  const messages = chatMessages.querySelectorAll('.message-user, .message-soulmate');
   
-  if (scrollPosition > scrollThreshold) {
-    // 50px以上スクロールしたら縮小
+  // メッセージが3件以上あれば縮小（状態が変わるときのみ実行）
+  if (messages.length >= 3 && !isHeaderScrolled) {
     chatHeader.classList.add('scrolled');
-  } else {
-    // 50px以下なら元に戻す
+    isHeaderScrolled = true;
+  } else if (messages.length < 3 && isHeaderScrolled) {
     chatHeader.classList.remove('scrolled');
+    isHeaderScrolled = false;
   }
 }
 
-// スクロールイベントリスナー（パフォーマンス最適化版）
-let scrollTimeout;
-window.addEventListener('scroll', () => {
-  if (!scrollTimeout) {
-    scrollTimeout = setTimeout(() => {
-      handleScroll();
-      scrollTimeout = null;
-    }, 10); // 10msごとに実行
-  }
+// MutationObserverでメッセージの追加を監視（デバウンス付き）
+let headerCheckTimeout;
+const messageObserver = new MutationObserver(() => {
+  // 短時間の連続実行を防ぐ
+  clearTimeout(headerCheckTimeout);
+  headerCheckTimeout = setTimeout(() => {
+    checkHeaderState();
+  }, 100);
 });
 
+// メッセージエリアの子要素の変更を監視
+if (chatMessages) {
+  messageObserver.observe(chatMessages, {
+    childList: true,
+    subtree: false
+  });
+}
+
 // 初期状態チェック
-handleScroll();
+checkHeaderState();
 
 console.log('💬 チャットページが読み込まれました');
