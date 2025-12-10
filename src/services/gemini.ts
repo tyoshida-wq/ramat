@@ -130,6 +130,8 @@ export async function generateImage(
   prompt: string,
   apiKey: string
 ): Promise<string> {
+  console.log('Generating image with prompt:', prompt.substring(0, 100) + '...');
+  
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_IMAGE_MODEL}:generateContent?key=${apiKey}`;
   
   const response = await fetch(url, {
@@ -151,18 +153,23 @@ export async function generateImage(
 
   if (!response.ok) {
     const error = await response.text();
+    console.error('Gemini Image API error:', response.status, error);
     throw new Error(`Gemini Image API error: ${response.status} - ${error}`);
   }
 
   const data = await response.json();
+  console.log('Image API response structure:', JSON.stringify(data).substring(0, 200));
   
   // 画像データを取得（base64）
   const imageData = data.candidates?.[0]?.content?.parts?.[0]?.inlineData;
   
   if (!imageData || !imageData.data) {
-    throw new Error('No image data returned from Gemini API');
+    console.error('No image data found. Response:', JSON.stringify(data, null, 2));
+    throw new Error(`No image data returned from Gemini API. Response: ${JSON.stringify(data).substring(0, 500)}`);
   }
 
+  console.log('Image data mimeType:', imageData.mimeType, 'Data length:', imageData.data.length);
+  
   // data:image/png;base64,... の形式で返す
   return `data:${imageData.mimeType};base64,${imageData.data}`;
 }
