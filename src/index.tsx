@@ -179,7 +179,7 @@ app.get('/chat', (c) => {
   return c.render(
     <div class="chat-container">
       {/* ソウルメイトヘッダー（固定） */}
-      <header class="chat-header">
+      <header class="chat-header" id="chatHeader">
         <div class="soulmate-avatar-wrapper">
           <img 
             src="https://via.placeholder.com/200/FFB7C5/FFFFFF?text=🦊" 
@@ -188,8 +188,10 @@ app.get('/chat', (c) => {
             id="soulmateAvatar"
           />
         </div>
-        <h2 class="soulmate-name" id="soulmateName">ユキヒメ</h2>
-        <p class="soulmate-concept" id="soulmateConcept">星影のホッキョクオオカミ</p>
+        <div class="soulmate-info">
+          <h2 class="soulmate-name" id="soulmateName">ユキヒメ</h2>
+          <p class="soulmate-concept" id="soulmateConcept">星影のホッキョクオオカミ</p>
+        </div>
         <div class="soulmate-status">
           <span class="status-indicator">🟢</span>
           <span class="status-text">オンライン</span>

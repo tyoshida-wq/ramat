@@ -26,10 +26,29 @@
   border-radius: 0 0 30px 30px;
   box-shadow: 0 4px 20px rgba(255, 107, 157, 0.2);
   animation: fadeInDown 0.6s ease-out;
+  transition: all 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* スクロール時の縮小ヘッダー */
+.chat-header.scrolled {
+  padding: 10px 20px;
+  flex-direction: row;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 12px;
+  border-radius: 0;
 }
 
 .soulmate-avatar-wrapper {
   margin-bottom: 20px;
+  transition: all 0.4s ease;
+}
+
+.chat-header.scrolled .soulmate-avatar-wrapper {
+  margin-bottom: 0;
 }
 
 .soulmate-avatar {
@@ -40,7 +59,15 @@
   box-shadow: 0 8px 30px rgba(255, 107, 157, 0.3);
   object-fit: cover;
   animation: float 3s ease-in-out infinite;
-  transition: all 0.3s ease;
+  transition: all 0.4s ease;
+}
+
+.chat-header.scrolled .soulmate-avatar {
+  width: 60px;
+  height: 60px;
+  border: 3px solid white;
+  box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+  animation: none; /* フローティングを停止 */
 }
 
 .soulmate-name {
@@ -51,6 +78,12 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 8px;
+  transition: all 0.4s ease;
+}
+
+.chat-header.scrolled .soulmate-name {
+  font-size: 1.125rem;
+  margin-bottom: 0;
 }
 
 .soulmate-concept {
@@ -58,6 +91,16 @@
   color: var(--text-secondary);
   font-weight: 400;
   margin-bottom: 10px;
+  transition: all 0.3s ease;
+  opacity: 1;
+  max-height: 30px;
+  overflow: hidden;
+}
+
+.chat-header.scrolled .soulmate-concept {
+  opacity: 0;
+  max-height: 0;
+  margin-bottom: 0;
 }
 
 .soulmate-status {
@@ -69,6 +112,13 @@
   padding: 6px 12px;
   background: rgba(255, 255, 255, 0.6);
   border-radius: 20px;
+  transition: all 0.4s ease;
+}
+
+.chat-header.scrolled .soulmate-status {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  margin-left: auto; /* 右寄せ */
 }
 
 .status-indicator {
@@ -368,4 +418,20 @@
   .chat-messages {
     margin-bottom: 140px; /* 極小画面用調整 */
   }
+}
+
+/* 縮小時の情報グループ */
+.soulmate-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.4s ease;
+}
+
+.chat-header.scrolled .soulmate-info {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
 }

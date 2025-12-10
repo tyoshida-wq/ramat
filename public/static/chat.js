@@ -214,4 +214,34 @@ function customizeWelcomeMessage() {
 // カスタマイズを実行
 customizeWelcomeMessage();
 
+// スクロール時のヘッダー縮小機能
+const chatHeader = document.getElementById('chatHeader');
+const scrollThreshold = 50; // スクロール閾値（px）
+
+function handleScroll() {
+  const scrollPosition = window.scrollY || window.pageYOffset;
+  
+  if (scrollPosition > scrollThreshold) {
+    // 50px以上スクロールしたら縮小
+    chatHeader.classList.add('scrolled');
+  } else {
+    // 50px以下なら元に戻す
+    chatHeader.classList.remove('scrolled');
+  }
+}
+
+// スクロールイベントリスナー（パフォーマンス最適化版）
+let scrollTimeout;
+window.addEventListener('scroll', () => {
+  if (!scrollTimeout) {
+    scrollTimeout = setTimeout(() => {
+      handleScroll();
+      scrollTimeout = null;
+    }, 10); // 10msごとに実行
+  }
+});
+
+// 初期状態チェック
+handleScroll();
+
 console.log('💬 チャットページが読み込まれました');
