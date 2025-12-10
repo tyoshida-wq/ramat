@@ -10,6 +10,7 @@ export const renderer = jsxRenderer(({ children }) => {
         <link href="/static/style.css" rel="stylesheet" />
         <link href="/static/admin.css" rel="stylesheet" />
         <link href="/static/chat.css" rel="stylesheet" />
+        <link href="/static/mypage.css" rel="stylesheet" />
       </head>
       <body>{children}</body>
     </html>

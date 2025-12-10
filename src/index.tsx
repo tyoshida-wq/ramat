@@ -93,6 +93,10 @@ app.get('/', (c) => {
           <span class="nav-icon">💬</span>
           <span class="nav-label">チャット</span>
         </a>
+        <a href="/mypage" class="nav-item">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">マイページ</span>
+        </a>
         <a href="/admin" class="nav-item">
           <span class="nav-icon">⚙️</span>
           <span class="nav-label">管理者</span>
@@ -162,6 +166,10 @@ app.get('/generate', (c) => {
         <a href="/chat" class="nav-item">
           <span class="nav-icon">💬</span>
           <span class="nav-label">チャット</span>
+        </a>
+        <a href="/mypage" class="nav-item">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item">
           <span class="nav-icon">⚙️</span>
@@ -239,6 +247,10 @@ app.get('/chat', (c) => {
           <span class="nav-icon">💬</span>
           <span class="nav-label">チャット</span>
         </a>
+        <a href="/mypage" class="nav-item">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">マイページ</span>
+        </a>
         <a href="/admin" class="nav-item">
           <span class="nav-icon">⚙️</span>
           <span class="nav-label">管理者</span>
@@ -246,6 +258,127 @@ app.get('/chat', (c) => {
       </nav>
 
       <script src="/static/chat.js"></script>
+    </div>
+  )
+})
+
+// マイページ
+app.get('/mypage', (c) => {
+  return c.render(
+    <div class="mypage-container">
+      {/* ヘッダー */}
+      <header class="mypage-header">
+        <h1 class="mypage-title">👤 マイページ</h1>
+        <p class="mypage-subtitle">あなたとソウルメイトの絆</p>
+      </header>
+
+      {/* メインコンテンツ */}
+      <main class="mypage-main">
+        {/* ソウルメイトプロフィールカード */}
+        <section class="soulmate-profile-card">
+          <div class="profile-image-wrapper">
+            <img 
+              src="https://via.placeholder.com/150/FFB7C5/FFFFFF?text=🦊" 
+              alt="ソウルメイト" 
+              class="profile-image"
+              id="profileImage"
+            />
+          </div>
+          <h2 class="profile-name" id="profileName">ユキヒメ</h2>
+          <p class="profile-concept" id="profileConcept">星影のホッキョクオオカミ</p>
+          <div class="profile-meta">
+            <div class="meta-item">
+              <span class="meta-icon">🐾</span>
+              <span class="meta-text" id="profileAnimal">北極オオカミ</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-icon">📅</span>
+              <span class="meta-text" id="profileDate">2025/12/10</span>
+            </div>
+          </div>
+          <div class="profile-days">
+            <span class="days-icon">🎂</span>
+            <span class="days-text">あなたと出会って</span>
+            <span class="days-count" id="daysCount">1</span>
+            <span class="days-unit">日</span>
+          </div>
+        </section>
+
+        {/* 統計情報 */}
+        <section class="stats-section">
+          <h2 class="section-title">📊 統計情報</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">💬</div>
+              <div class="stat-value" id="statMessages">0</div>
+              <div class="stat-label">会話数</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">❤️</div>
+              <div class="stat-value" id="statFavorites">0</div>
+              <div class="stat-label">お気に入り</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📅</div>
+              <div class="stat-value" id="statDays">1</div>
+              <div class="stat-label">日</div>
+            </div>
+          </div>
+        </section>
+
+        {/* 設定メニュー */}
+        <section class="settings-section">
+          <h2 class="section-title">🔧 設定</h2>
+          <div class="settings-menu">
+            <button class="setting-item" id="notificationSettings">
+              <span class="setting-icon">🔔</span>
+              <span class="setting-text">通知設定</span>
+              <span class="setting-arrow">›</span>
+            </button>
+            <button class="setting-item" id="themeSettings">
+              <span class="setting-icon">🎨</span>
+              <span class="setting-text">テーマ変更</span>
+              <span class="setting-arrow">›</span>
+            </button>
+            <button class="setting-item" id="exportData">
+              <span class="setting-icon">💾</span>
+              <span class="setting-text">データエクスポート</span>
+              <span class="setting-arrow">›</span>
+            </button>
+            <button class="setting-item danger" id="deleteData">
+              <span class="setting-icon">🗑️</span>
+              <span class="setting-text">データ削除</span>
+              <span class="setting-arrow">›</span>
+            </button>
+          </div>
+        </section>
+      </main>
+
+      {/* 下部ナビゲーション */}
+      <nav class="bottom-nav">
+        <a href="/" class="nav-item">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">トップ</span>
+        </a>
+        <a href="/generate" class="nav-item">
+          <span class="nav-icon">✨</span>
+          <span class="nav-label">生成</span>
+        </a>
+        <a href="/chat" class="nav-item">
+          <span class="nav-icon">💬</span>
+          <span class="nav-label">チャット</span>
+        </a>
+        <a href="/mypage" class="nav-item active">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">マイページ</span>
+        </a>
+        <a href="/admin" class="nav-item">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">管理者</span>
+        </a>
+      </nav>
+
+      <script src="/static/mypage.js"></script>
     </div>
   )
 })
@@ -431,6 +564,10 @@ app.get('/admin', (c) => {
         <a href="/chat" class="nav-item">
           <span class="nav-icon">💬</span>
           <span class="nav-label">チャット</span>
+        </a>
+        <a href="/mypage" class="nav-item">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item active">
           <span class="nav-icon">⚙️</span>
