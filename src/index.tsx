@@ -87,6 +87,200 @@ app.get('/', (c) => {
   )
 })
 
+// 管理者ページ
+app.get('/admin', (c) => {
+  return c.render(
+    <div class="admin-container">
+      <header class="admin-header">
+        <h1 class="admin-title">⚙️ 管理者ダッシュボード</h1>
+        <p class="admin-subtitle">Ramat システム管理</p>
+      </header>
+
+      <main class="admin-main">
+        {/* 統計カード */}
+        <section class="stats-section">
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+              <div class="stat-label">総生成数</div>
+              <div class="stat-value" id="totalGenerations">0</div>
+              <div class="stat-change">↑ 12% (先週比)</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+              <div class="stat-label">ユーザー数</div>
+              <div class="stat-value" id="totalUsers">0</div>
+              <div class="stat-change">↑ 8% (先週比)</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">🔥</div>
+            <div class="stat-content">
+              <div class="stat-label">今日の生成</div>
+              <div class="stat-value" id="todayGenerations">0</div>
+              <div class="stat-change">→ 0% (昨日比)</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-content">
+              <div class="stat-label">API使用率</div>
+              <div class="stat-value" id="apiUsage">0%</div>
+              <div class="stat-progress">
+                <div class="stat-progress-bar" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* クイックアクション */}
+        <section class="quick-actions">
+          <h2 class="section-title">🎯 クイックアクション</h2>
+          <div class="action-buttons">
+            <button class="action-btn primary">
+              <span class="btn-icon">✨</span>
+              <span>新規生成</span>
+            </button>
+            <button class="action-btn secondary">
+              <span class="btn-icon">📜</span>
+              <span>履歴確認</span>
+            </button>
+            <button class="action-btn info">
+              <span class="btn-icon">💾</span>
+              <span>データ保存</span>
+            </button>
+            <button class="action-btn warning">
+              <span class="btn-icon">🔄</span>
+              <span>システム更新</span>
+            </button>
+          </div>
+        </section>
+
+        {/* グラフエリア */}
+        <section class="charts-section">
+          <div class="chart-card">
+            <h3 class="chart-title">📈 週間生成数推移</h3>
+            <canvas id="weeklyChart" class="chart-canvas"></canvas>
+          </div>
+          
+          <div class="chart-card">
+            <h3 class="chart-title">🏆 人気動物 TOP 5</h3>
+            <div class="top-animals">
+              <div class="animal-rank">
+                <span class="rank">1</span>
+                <span class="animal-name">🦊 北極ギツネ</span>
+                <div class="rank-bar" style="width: 45%">45%</div>
+              </div>
+              <div class="animal-rank">
+                <span class="rank">2</span>
+                <span class="animal-name">🐼 パンダ</span>
+                <div class="rank-bar" style="width: 30%">30%</div>
+              </div>
+              <div class="animal-rank">
+                <span class="rank">3</span>
+                <span class="animal-name">🦌 トナカイ</span>
+                <div class="rank-bar" style="width: 20%">20%</div>
+              </div>
+              <div class="animal-rank">
+                <span class="rank">4</span>
+                <span class="animal-name">🐨 コアラ</span>
+                <div class="rank-bar" style="width: 3%">3%</div>
+              </div>
+              <div class="animal-rank">
+                <span class="rank">5</span>
+                <span class="animal-name">🦝 アライグマ</span>
+                <div class="rank-bar" style="width: 2%">2%</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 最近の生成履歴 */}
+        <section class="history-section">
+          <h2 class="section-title">📝 最近の生成履歴</h2>
+          <div class="history-table">
+            <div class="table-header">
+              <div class="col-image">画像</div>
+              <div class="col-name">名前</div>
+              <div class="col-animal">動物</div>
+              <div class="col-time">生成時刻</div>
+              <div class="col-actions">操作</div>
+            </div>
+            <div class="table-body" id="historyTableBody">
+              <div class="table-row">
+                <div class="col-image">
+                  <div class="history-thumbnail">🦊</div>
+                </div>
+                <div class="col-name">ユキヒメ</div>
+                <div class="col-animal">北極ギツネ</div>
+                <div class="col-time">2分前</div>
+                <div class="col-actions">
+                  <button class="icon-btn view" title="詳細">👁️</button>
+                  <button class="icon-btn delete" title="削除">🗑️</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* システム設定 */}
+        <section class="settings-section">
+          <h2 class="section-title">⚙️ システム設定</h2>
+          <div class="settings-grid">
+            <div class="setting-card">
+              <h3>🔑 API管理</h3>
+              <p>API制限とレート設定</p>
+              <button class="setting-btn">設定を開く</button>
+            </div>
+            <div class="setting-card">
+              <h3>💾 データベース</h3>
+              <p>バックアップと復元</p>
+              <button class="setting-btn">管理する</button>
+            </div>
+            <div class="setting-card">
+              <h3>👥 ユーザー管理</h3>
+              <p>権限とアクセス制御</p>
+              <button class="setting-btn">管理する</button>
+            </div>
+            <div class="setting-card">
+              <h3>🎨 動物・名前管理</h3>
+              <p>リスト編集と追加</p>
+              <button class="setting-btn">編集する</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <nav class="bottom-nav">
+        <a href="/" class="nav-item">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">トップ</span>
+        </a>
+        <a href="/generate" class="nav-item">
+          <span class="nav-icon">✨</span>
+          <span class="nav-label">生成</span>
+        </a>
+        <a href="/chat" class="nav-item">
+          <span class="nav-icon">💬</span>
+          <span class="nav-label">チャット</span>
+        </a>
+        <a href="/admin" class="nav-item active">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">管理者</span>
+        </a>
+      </nav>
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script src="/static/admin.js"></script>
+    </div>
+  )
+})
+
 // API: ソウルメイト生成
 app.post('/api/generate', async (c) => {
   try {
@@ -129,6 +323,25 @@ app.post('/api/generate', async (c) => {
       details: error instanceof Error ? error.message : 'Unknown error'
     }, 500)
   }
+})
+
+// API: 管理者統計データ
+app.get('/api/admin/stats', (c) => {
+  // TODO: 実際のデータベースから取得
+  return c.json({
+    totalGenerations: 1234,
+    totalUsers: 456,
+    todayGenerations: 89,
+    apiUsage: 67,
+    weeklyData: [65, 78, 90, 81, 95, 88, 92],
+    topAnimals: [
+      { name: '北極ギツネ', count: 234, percentage: 45 },
+      { name: 'パンダ', count: 156, percentage: 30 },
+      { name: 'トナカイ', count: 104, percentage: 20 },
+      { name: 'コアラ', count: 16, percentage: 3 },
+      { name: 'アライグマ', count: 10, percentage: 2 },
+    ]
+  })
 })
 
 export default app
