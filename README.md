@@ -1,21 +1,89 @@
-```txt
-npm install
-npm run dev
+# Ramat
+
+## プロジェクト概要
+- **名前**: Ramat
+- **目的**: 孤独な魂に寄り添う、世界で一匹だけの「ソウルメイト（守護動物）」を生成するウェブアプリケーション
+- **ターゲット**: 女性ユーザー向け
+- **特徴**: 
+  - パステルカラーの桜色グラデーションデザイン
+  - モバイル最適化（レスポンシブ対応）
+  - AI生成による守護動物のプロフィールと画像
+
+## URLs
+- **Production**: https://ramat.pages.dev
+- **Latest Deploy**: https://fe88df76.ramat.pages.dev
+- **Sandbox Dev**: https://3000-i1w5j0r4k4fnfaobo1q5r-c07dda5e.sandbox.novita.ai
+
+## 現在の実装状況
+
+### ✅ 完了した機能
+- モバイル最適化されたUI
+- 桜色グラデーションデザイン
+- レスポンシブレイアウト
+- 生成ボタンのアニメーション
+- 結果表示エリアのレイアウト（非表示状態）
+
+### ❌ 未実装の機能
+- Gemini API連携（テキスト生成）
+- 画像生成機能
+- ランダム動物・名前選択
+- 結果表示のインタラクション
+- ローディング状態の管理
+
+## データアーキテクチャ
+
+### 動物リスト（全75種類）
+- **哺乳類**: 55種類（小動物、ネコ科、イヌ科、シカ科、海洋哺乳類など）
+- **幻想的生物**: 20種類（西洋系10種、東洋系10種）
+
+### 名前リスト（全100種類）
+- **カタカナ系**: 50種類（星・光系、自然系、音楽系、宝石系など）
+- **ひらがな系**: 50種類（季節・時間系、自然系、動物・生物系など）
+
+### ストレージサービス
+- 現在未使用（今後画像保存などで検討）
+
+## 生成フロー（未実装）
+1. **ステップ①**: ランダムで動物と名前を選択
+2. **ステップ②**: Gemini 2.0 Flash でプロフィール生成
+3. **ステップ③**: Gemini 2.5 Flash Image で画像生成
+4. **ステップ④**: 結果をUIに表示
+
+## 技術スタック
+- **Frontend**: HTML/CSS (パステルカラーデザイン)
+- **Backend**: Hono + TypeScript
+- **Deployment**: Cloudflare Pages
+- **AI**: Gemini API（未実装）
+- **Version Control**: Git
+
+## 次の開発ステップ
+1. Gemini API連携の実装
+2. フロントエンドJavaScript追加（ボタンクリックハンドラー）
+3. 動物・名前のランダム選択ロジック
+4. プロフィール生成プロンプトの実装
+5. 画像生成の実装
+6. 結果表示のアニメーション実装
+
+## デプロイ
+- **Platform**: Cloudflare Pages
+- **Status**: ✅ Active
+- **Last Updated**: 2025-12-10
+
+## ローカル開発
+```bash
+# ビルド
+npm run build
+
+# 開発サーバー起動（PM2）
+pm2 start ecosystem.config.cjs
+
+# ログ確認
+pm2 logs webapp --nostream
+
+# 停止
+pm2 delete webapp
 ```
 
-```txt
-npm run deploy
-```
-
-[For generating/synchronizing types based on your Worker configuration run](https://developers.cloudflare.com/workers/wrangler/commands/#types):
-
-```txt
-npm run cf-typegen
-```
-
-Pass the `CloudflareBindings` as generics when instantiation `Hono`:
-
-```ts
-// src/index.ts
-const app = new Hono<{ Bindings: CloudflareBindings }>()
-```
+## プロジェクト管理
+- Git履歴で全変更を追跡
+- 定期的なコミットで開発進捗を記録
