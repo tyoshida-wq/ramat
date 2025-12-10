@@ -16,7 +16,94 @@ app.use('/api/*', cors())
 
 app.use(renderer)
 
+// トップページ（ランディングページ）
 app.get('/', (c) => {
+  return c.render(
+    <div class="container">
+      <header class="header">
+        <h1 class="title">✨ Ramat</h1>
+        <p class="subtitle">あなただけの守護動物に出会おう</p>
+      </header>
+
+      <main class="main landing-main">
+        {/* ヒーローセクション */}
+        <section class="hero-section">
+          <div class="hero-content">
+            <h2 class="hero-title">孤独な魂に寄り添う守護動物</h2>
+            <p class="hero-description">
+              AIが生み出す、あなただけのソウルメイト。<br />
+              75種類の動物と100種類の名前から、<br />
+              唯一無二の守護動物が誕生します。
+            </p>
+            <a href="/generate" class="hero-btn">
+              <span class="btn-icon">✨</span>
+              <span class="btn-text">今すぐ始める</span>
+            </a>
+          </div>
+        </section>
+
+        {/* 特徴セクション */}
+        <section class="features-section">
+          <h2 class="section-heading">Ramatの特徴</h2>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon">🎨</div>
+              <h3 class="feature-title">AI生成アート</h3>
+              <p class="feature-desc">Gemini AIが生み出す、世界に一つだけのKawaiiイラスト</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">💭</div>
+              <h3 class="feature-title">個性的なプロフィール</h3>
+              <p class="feature-desc">性格、口調、コンセプトまで細かく設定された唯一無二のキャラクター</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🌸</div>
+              <h3 class="feature-title">癒しのデザイン</h3>
+              <p class="feature-desc">パステルカラーの桜色グラデーションで心を包む優しいUI</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🦊</div>
+              <h3 class="feature-title">多様な動物</h3>
+              <p class="feature-desc">哺乳類55種 + 幻想的生物20種から運命の出会い</p>
+            </div>
+          </div>
+        </section>
+
+        {/* CTAセクション */}
+        <section class="cta-section">
+          <h2 class="cta-title">あなたのソウルメイトに会いに行こう</h2>
+          <p class="cta-description">たった一度のクリックで、運命の守護動物があなたのもとに</p>
+          <a href="/generate" class="cta-btn">
+            <span class="btn-icon">🌸</span>
+            <span class="btn-text">ソウルメイトを呼ぶ</span>
+          </a>
+        </section>
+      </main>
+
+      <nav class="bottom-nav">
+        <a href="/" class="nav-item active">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">トップ</span>
+        </a>
+        <a href="/generate" class="nav-item">
+          <span class="nav-icon">✨</span>
+          <span class="nav-label">生成</span>
+        </a>
+        <a href="/chat" class="nav-item">
+          <span class="nav-icon">💬</span>
+          <span class="nav-label">チャット</span>
+        </a>
+        <a href="/admin" class="nav-item">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">管理者</span>
+        </a>
+      </nav>
+    </div>
+  )
+})
+
+// 生成ページ（旧トップページの機能）
+app.get('/generate', (c) => {
   return c.render(
     <div class="container">
       <header class="header">
@@ -64,11 +151,11 @@ app.get('/', (c) => {
       </main>
 
       <nav class="bottom-nav">
-        <a href="/" class="nav-item active">
+        <a href="/" class="nav-item">
           <span class="nav-icon">🏠</span>
           <span class="nav-label">トップ</span>
         </a>
-        <a href="/generate" class="nav-item">
+        <a href="/generate" class="nav-item active">
           <span class="nav-icon">✨</span>
           <span class="nav-label">生成</span>
         </a>
