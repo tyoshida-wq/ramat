@@ -11,8 +11,9 @@
 
 ## URLs
 - **Production**: https://ramat.pages.dev
-- **Latest Deploy**: https://321c1dc5.ramat.pages.dev
+- **Latest Deploy**: https://e170cb8d.ramat.pages.dev
 - **Sandbox Dev**: https://3000-i1w5j0r4k4fnfaobo1q5r-c07dda5e.sandbox.novita.ai
+- **管理者ページ**: https://ramat.pages.dev/admin
 
 ## 実装された機能
 
@@ -35,6 +36,22 @@
    - 生成結果のスムーズな表示
    - エラーハンドリング
 
+4. **下部ナビゲーションメニュー**
+   - トップ（メイン生成ページ）
+   - 生成（今後実装予定）
+   - チャット（今後実装予定）
+   - 管理者（管理者ダッシュボード）
+
+5. **管理者ダッシュボード（フル機能版）**
+   - **統計カード**: 総生成数、ユーザー数、今日の生成、API使用率
+   - **クイックアクション**: 新規生成、履歴確認、データ保存、システム更新
+   - **週間グラフ**: Chart.jsによる週間生成数推移の可視化
+   - **人気動物TOP 5**: ランキングバーチャート
+   - **生成履歴テーブル**: 最近の生成履歴一覧（画像、名前、動物、時刻、操作）
+   - **システム設定**: API管理、データベース、ユーザー管理、動物・名前管理
+   - **リアルタイム更新**: 30秒ごとに統計を自動更新
+   - **カウントアップアニメーション**: 数値の滑らかな表示
+
 ### 機能詳細
 
 #### 生成フロー
@@ -45,25 +62,42 @@
 5. 結果をUIに表示
 
 #### API エンドポイント
-- **POST /api/generate**
-  - レスポンス例:
-    ```json
-    {
-      "success": true,
-      "animal": {
-        "en": "arctic wolf",
-        "ja": "北極オオカミ"
-      },
-      "profile": {
-        "concept": "星影のホッキョクオオカミ",
-        "name": "アキラ",
-        "personality": "物静かで穏やか...",
-        "tone": "静かで優しい語り口...",
-        "imagePrompt": "...",
-        "image": "data:image/png;base64,..."
-      }
+
+**POST /api/generate** - ソウルメイト生成
+- レスポンス例:
+  ```json
+  {
+    "success": true,
+    "animal": {
+      "en": "arctic wolf",
+      "ja": "北極オオカミ"
+    },
+    "profile": {
+      "concept": "星影のホッキョクオオカミ",
+      "name": "アキラ",
+      "personality": "物静かで穏やか...",
+      "tone": "静かで優しい語り口...",
+      "imagePrompt": "...",
+      "image": "data:image/png;base64,..."
     }
-    ```
+  }
+  ```
+
+**GET /api/admin/stats** - 管理者統計データ
+- レスポンス例:
+  ```json
+  {
+    "totalGenerations": 1234,
+    "totalUsers": 456,
+    "todayGenerations": 89,
+    "apiUsage": 67,
+    "weeklyData": [65, 78, 90, 81, 95, 88, 92],
+    "topAnimals": [
+      { "name": "北極ギツネ", "count": 234, "percentage": 45 },
+      { "name": "パンダ", "count": 156, "percentage": 30 }
+    ]
+  }
+  ```
 
 ## データアーキテクチャ
 
@@ -117,6 +151,7 @@
 - **Frontend**: HTML/CSS/JavaScript (Vanilla)
 - **Backend**: Hono + TypeScript
 - **AI**: Google Gemini API (2.0 Flash + 2.5 Flash Image)
+- **Charts**: Chart.js (週間グラフ可視化)
 - **Deployment**: Cloudflare Pages
 - **Development**: PM2 + Wrangler
 - **Version Control**: Git
@@ -169,14 +204,42 @@ npx wrangler pages secret put GEMINI_API_KEY --project-name ramat
 - `.gitignore` で機密情報を保護（.dev.vars, .env等）
 
 ## 使用方法
+
+### メインページ（ソウルメイト生成）
 1. https://ramat.pages.dev にアクセス
 2. 「ソウルメイトを呼ぶ」ボタンをクリック
 3. AIが動物と名前を選んでプロフィールと画像を生成
 4. あなただけの守護動物が表示されます
 
+### 管理者ダッシュボード
+1. https://ramat.pages.dev/admin にアクセス
+2. 統計情報とグラフを確認
+3. クイックアクションでシステム操作
+4. 生成履歴の確認と管理
+5. システム設定の変更
+
+## ページ構成
+
+- **トップ** (`/`) - メイン生成ページ
+- **生成** (`/generate`) - 今後実装予定
+- **チャット** (`/chat`) - 今後実装予定  
+- **管理者** (`/admin`) - 管理者ダッシュボード（実装済み）
+
 ## 今後の改善案
-- 生成結果の保存機能
+
+### 短期（Phase 1）
+- 生成結果の保存機能（D1 Database）
 - お気に入り機能
+- ユーザー認証機能
+
+### 中期（Phase 2）
+- 生成ページ（履歴から再生成）
+- チャットページ（ソウルメイトとの会話機能）
 - SNSシェア機能
-- 複数回生成の履歴表示
+- データエクスポート機能
+
+### 長期（Phase 3）
 - カスタム動物・名前選択機能
+- A/Bテスト機能
+- より詳細な分析ダッシュボード
+- 多言語対応
