@@ -1427,23 +1427,149 @@ app.get('/api/auth/me', async (c) => {
 // 管理者API
 // ========================================
 
-// API: 管理者統計データ
-app.get('/api/admin/stats', (c) => {
-  // TODO: 実際のデータベースから取得
-  return c.json({
-    totalGenerations: 1234,
-    totalUsers: 456,
-    todayGenerations: 89,
-    apiUsage: 67,
-    weeklyData: [65, 78, 90, 81, 95, 88, 92],
-    topAnimals: [
-      { name: '北極ギツネ', count: 234, percentage: 45 },
-      { name: 'パンダ', count: 156, percentage: 30 },
-      { name: 'トナカイ', count: 104, percentage: 20 },
-      { name: 'コアラ', count: 16, percentage: 3 },
-      { name: 'アライグマ', count: 10, percentage: 2 },
-    ]
-  })
+// API: 管理者統計データ（D1データベースから実データ取得）
+app.get('/api/admin/stats', async (c) => {
+  try {
+    const db = c.env.DB
+
+    // 総生成数
+    const totalGenerationsResult = await db.prepare(
+      'SELECT COUNT(*) as count FROM soulmates'
+    ).first()
+    const totalGenerations = totalGenerationsResult?.count || 0
+
+    // 総ユーザー数
+    const totalUsersResult = await db.prepare(
+      'SELECT COUNT(*) as count FROM users'
+    ).first()
+    const totalUsers = totalUsersResult?.count || 0
+
+    // 今日の生成数
+    const today = new Date().toISOString().split('T')[0]
+    const todayGenerationsResult = await db.prepare(
+      'SELECT COUNT(*) as count FROM soulmates WHERE DATE(created_at) = ?'
+    ).bind(today).first()
+    const todayGenerations = todayGenerationsResult?.count || 0
+
+    // API使用率（簡易計算：総生成数 / 上限 * 100）
+    const apiUsageLimit = 10000 // 仮の上限
+    const apiUsage = Math.min(100, Math.round((totalGenerations / apiUsageLimit) * 100))
+
+    // 週間データ（過去7日間の生成数）
+    const weeklyData = []
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      const dateStr = date.toISOString().split('T')[0]
+      
+      const dayResult = await db.prepare(
+        'SELECT COUNT(*) as count FROM soulmates WHERE DATE(created_at) = ?'
+      ).bind(dateStr).first()
+      
+      weeklyData.push(dayResult?.count || 0)
+    }
+
+    // トップ動物ランキング（TOP 5）
+    const topAnimalsResult = await db.prepare(
+      'SELECT animal, COUNT(*) as count FROM soulmates GROUP BY animal ORDER BY count DESC LIMIT 5'
+    ).all()
+
+    const topAnimals = topAnimalsResult.results.map((row: any, index: number) => {
+      const percentage = totalGenerations > 0 
+        ? Math.round((row.count / totalGenerations) * 100) 
+        : 0
+      return {
+        name: row.animal,
+        count: row.count,
+        percentage
+      }
+    })
+
+    return c.json({
+      totalGenerations,
+      totalUsers,
+      todayGenerations,
+      apiUsage,
+      weeklyData,
+      topAnimals
+    })
+
+  } catch (error) {
+    console.error('Admin stats API error:', error)
+    return c.json({ 
+      error: 'Failed to fetch admin stats',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: 管理者生成履歴データ（全ユーザー）
+app.get('/api/admin/history', async (c) => {
+  try {
+    const db = c.env.DB
+
+    // 最新50件の生成履歴を取得（ユーザー情報とソウルメイト情報を結合）
+    const historyResult = await db.prepare(`
+      SELECT 
+        s.id,
+        s.name,
+        s.animal,
+        s.image_base64,
+        s.created_at,
+        u.email,
+        u.username
+      FROM soulmates s
+      LEFT JOIN users u ON s.user_id = u.id
+      ORDER BY s.created_at DESC
+      LIMIT 50
+    `).all()
+
+    // 相対時間を計算する関数
+    const getRelativeTime = (dateStr: string) => {
+      const now = new Date()
+      const created = new Date(dateStr)
+      const diffMs = now.getTime() - created.getTime()
+      const diffMins = Math.floor(diffMs / 60000)
+      const diffHours = Math.floor(diffMs / 3600000)
+      const diffDays = Math.floor(diffMs / 86400000)
+
+      if (diffMins < 1) return 'たった今'
+      if (diffMins < 60) return `${diffMins}分前`
+      if (diffHours < 24) return `${diffHours}時間前`
+      if (diffDays < 7) return `${diffDays}日前`
+      
+      // 7日以上前は日付表示
+      return created.toLocaleDateString('ja-JP', { 
+        month: 'short', 
+        day: 'numeric' 
+      })
+    }
+
+    const history = historyResult.results.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      animal: row.animal,
+      thumbnail: row.image_base64 ? row.image_base64.substring(0, 100) : null, // サムネイル用に一部取得
+      image: row.image_base64, // 詳細表示用の完全な画像
+      time: getRelativeTime(row.created_at),
+      createdAt: row.created_at,
+      userEmail: row.email || '不明',
+      username: row.username || 'ゲスト'
+    }))
+
+    return c.json({
+      success: true,
+      history,
+      total: history.length
+    })
+
+  } catch (error) {
+    console.error('Admin history API error:', error)
+    return c.json({ 
+      error: 'Failed to fetch admin history',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
 })
 
 export default app

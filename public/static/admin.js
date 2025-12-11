@@ -126,61 +126,135 @@ function drawWeeklyChart(weeklyData) {
   });
 }
 
-// 履歴データの読み込み
+// 履歴データの読み込み（実API接続版）
 async function loadHistory() {
-  // TODO: 実際のAPI実装
-  const mockHistory = [
-    {
-      id: 1,
-      name: 'ユキヒメ',
-      animal: '北極ギツネ',
-      thumbnail: '🦊',
-      time: '2分前'
-    },
-    {
-      id: 2,
-      name: 'サクラ',
-      animal: 'パンダ',
-      thumbnail: '🐼',
-      time: '15分前'
-    },
-    {
-      id: 3,
-      name: 'ルナ',
-      animal: 'トナカイ',
-      thumbnail: '🦌',
-      time: '1時間前'
+  try {
+    const response = await fetch('/api/admin/history');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch history');
     }
-  ];
-  
-  const tbody = document.getElementById('historyTableBody');
-  if (!tbody) return;
-  
-  tbody.innerHTML = mockHistory.map(item => `
-    <div class="table-row">
-      <div class="col-image">
-        <div class="history-thumbnail">${item.thumbnail}</div>
-      </div>
-      <div class="col-name">${item.name}</div>
-      <div class="col-animal">${item.animal}</div>
-      <div class="col-time">${item.time}</div>
-      <div class="col-actions">
-        <button class="icon-btn view" onclick="viewDetail(${item.id})" title="詳細">👁️</button>
-        <button class="icon-btn delete" onclick="deleteItem(${item.id})" title="削除">🗑️</button>
-      </div>
-    </div>
-  `).join('');
+    
+    const data = await response.json();
+    
+    if (!data.success || !data.history) {
+      throw new Error('Invalid response format');
+    }
+    
+    const tbody = document.getElementById('historyTableBody');
+    if (!tbody) return;
+    
+    // 履歴が空の場合
+    if (data.history.length === 0) {
+      tbody.innerHTML = `
+        <div class="table-row" style="justify-content: center; padding: 40px; opacity: 0.6;">
+          <p>まだ生成履歴がありません</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // 履歴データを表示
+    tbody.innerHTML = data.history.map(item => {
+      // サムネイル表示（画像があればimg、なければ絵文字）
+      const thumbnailHTML = item.image 
+        ? `<img src="${item.image}" alt="${item.name}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">` 
+        : getAnimalEmoji(item.animal);
+      
+      return `
+        <div class="table-row">
+          <div class="col-image">
+            <div class="history-thumbnail">${thumbnailHTML}</div>
+          </div>
+          <div class="col-name">${escapeHtml(item.name)}</div>
+          <div class="col-animal">${escapeHtml(item.animal)}</div>
+          <div class="col-time" title="${item.createdAt}">${escapeHtml(item.time)}</div>
+          <div class="col-actions">
+            <button class="icon-btn view" onclick="viewDetail(${item.id}, '${escapeHtml(item.name)}', '${escapeHtml(item.animal)}', '${item.createdAt}', '${escapeHtml(item.username)}')" title="詳細">👁️</button>
+            <button class="icon-btn delete" onclick="deleteItem(${item.id}, '${escapeHtml(item.name)}')" title="削除">🗑️</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+  } catch (error) {
+    console.error('Failed to load history:', error);
+    
+    const tbody = document.getElementById('historyTableBody');
+    if (tbody) {
+      tbody.innerHTML = `
+        <div class="table-row" style="justify-content: center; padding: 40px; color: #ff6b9d;">
+          <p>⚠️ 履歴の読み込みに失敗しました</p>
+        </div>
+      `;
+    }
+  }
 }
 
-// 詳細表示
-function viewDetail(id) {
-  alert(`詳細表示: ID ${id}\n\n※ 実装予定の機能です`);
+// 動物の絵文字を取得する関数
+function getAnimalEmoji(animal) {
+  const emojiMap = {
+    '北極ギツネ': '🦊',
+    'パンダ': '🐼',
+    'トナカイ': '🦌',
+    'コアラ': '🐨',
+    'アライグマ': '🦝',
+    'ペンギン': '🐧',
+    'ウサギ': '🐰',
+    'クマ': '🐻',
+    '猫': '🐱',
+    '犬': '🐶',
+    '鹿': '🦌',
+    '狐': '🦊',
+    '狼': '🐺',
+    'フクロウ': '🦉',
+    'ハリネズミ': '🦔',
+    'リス': '🐿️',
+    'ユニコーン': '🦄',
+    'ドラゴン': '🐉',
+    'フェニックス': '🔥'
+  };
+  return emojiMap[animal] || '✨';
 }
 
-// 削除確認
-function deleteItem(id) {
-  if (confirm('この生成を削除しますか？')) {
-    alert(`削除しました: ID ${id}\n\n※ 実装予定の機能です`);
+// HTMLエスケープ関数（XSS対策）
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// 詳細表示（モーダル表示）
+function viewDetail(id, name, animal, createdAt, username) {
+  // 日時をフォーマット
+  const date = new Date(createdAt);
+  const formattedDate = date.toLocaleString('ja-JP', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  
+  alert(`📋 生成詳細\n\n` +
+        `ID: ${id}\n` +
+        `名前: ${name}\n` +
+        `動物: ${animal}\n` +
+        `生成日時: ${formattedDate}\n` +
+        `ユーザー: ${username}\n\n` +
+        `※ 詳細モーダル表示は今後実装予定です`);
+}
+
+// 削除確認（将来的にAPI実装）
+function deleteItem(id, name) {
+  if (confirm(`「${name}」の生成データを削除しますか？\n\n※ この操作は取り消せません`)) {
+    // TODO: DELETE /api/admin/history/:id を実装
+    alert(`削除しました: ${name} (ID: ${id})\n\n※ API実装は今後予定です`);
     loadHistory(); // リロード
   }
 }
