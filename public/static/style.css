@@ -986,3 +986,60 @@ body {
   width: 100%;
   margin-bottom: 1rem;
 }
+
+/* Google OAuth ボタン */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #ddd;
+}
+
+.auth-divider span {
+  padding: 0 1rem;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.google-btn:hover {
+  background: #f8f9fa;
+  border-color: #4285F4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2);
+}
+
+.google-icon {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .google-btn {
+    font-size: 0.95rem;
+    padding: 0.75rem;
+  }
+}
