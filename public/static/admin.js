@@ -320,13 +320,22 @@ document.addEventListener('DOMContentLoaded', () => {
 // ユーザー一覧の読み込み
 async function loadUsers() {
   try {
-    const response = await fetch('/api/admin/users');
-    const data = await response.json();
+    const response = await fetch('/api/admin/users', {
+      credentials: 'include'
+    });
     
     const tbody = document.getElementById('usersTableBody');
     if (!tbody) return;
     
-    if (!data.users || data.users.length === 0) {
+    if (!response.ok) {
+      const error = await response.json();
+      tbody.innerHTML = `<div class="error">エラー: ${error.error || '読み込みに失敗'}</div>`;
+      return;
+    }
+    
+    const data = await response.json();
+    
+    if (!data.success || !data.users || data.users.length === 0) {
       tbody.innerHTML = '<div class="no-data">ユーザーがまだいません</div>';
       return;
     }
@@ -357,7 +366,9 @@ async function loadUsers() {
 // ユーザーのメモリー情報を表示
 async function viewUserMemory(userId, soulmateName) {
   try {
-    const response = await fetch(`/api/admin/users/${userId}/memory`);
+    const response = await fetch(`/api/admin/users/${userId}/memory`, {
+      credentials: 'include'
+    });
     const data = await response.json();
     
     if (!data.success) {
