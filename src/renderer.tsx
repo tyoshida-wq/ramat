@@ -18,7 +18,10 @@ export const renderer = jsxRenderer(({ children }) => {
         <link href="/static/store.css" rel="stylesheet" />
         <link href="/static/login.css" rel="stylesheet" />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <script src="/static/common.js"></script>
+      </body>
     </html>
   )
 })
