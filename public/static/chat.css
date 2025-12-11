@@ -296,7 +296,7 @@
   font-size: 1rem;
   outline: none;
   transition: all 0.3s ease;
-  font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+  font-family: 'Zen Maru Gothic', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
 }
 
 .chat-input:focus {

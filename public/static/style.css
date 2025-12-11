@@ -27,8 +27,8 @@
 }
 
 body {
-  font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 
-               'Meiryo', sans-serif;
+  font-family: 'Zen Maru Gothic', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 
+               'Yu Gothic', 'Meiryo', sans-serif;
   background: linear-gradient(135deg, var(--sakura-light) 0%, var(--sakura-pink) 100%);
   min-height: 100vh;
   color: var(--text-primary);
