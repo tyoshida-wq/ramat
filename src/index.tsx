@@ -556,11 +556,16 @@ app.get('/store', (c) => {
       </header>
 
       <main class="store-main">
+        {/* 待ち受け画像セクション（動的生成） */}
+        <section class="wallpaper-section" id="wallpaperSection">
+          {/* ここに待ち受け生成ボタンまたは商品が表示される */}
+        </section>
+
         {/* 商品カテゴリー */}
         <section class="category-section">
+          <h2 class="section-title">🎁 その他のグッズ</h2>
           <div class="category-tabs">
             <button class="category-tab active" data-category="all">すべて</button>
-            <button class="category-tab" data-category="wallpaper">待ち受け</button>
             <button class="category-tab" data-category="goods">グッズ</button>
           </div>
         </section>
@@ -568,73 +573,6 @@ app.get('/store', (c) => {
         {/* 商品グリッド */}
         <section class="products-section">
           <div class="products-grid" id="productsGrid">
-            {/* スマホ待ち受け */}
-            <div class="product-card" data-category="wallpaper">
-              <div class="product-image">
-                <img src="https://via.placeholder.com/300x600/FFB7C5/FFFFFF?text=📱" alt="スマホ待ち受け" />
-                <span class="product-badge">デジタル</span>
-              </div>
-              <div class="product-info">
-                <h3 class="product-name">スマホ待ち受け画像</h3>
-                <p class="product-desc">あなたのソウルメイトがいつも一緒に</p>
-                <div class="product-specs">
-                  <span class="spec-item">📐 1080x2340px</span>
-                  <span class="spec-item">🎨 高画質PNG</span>
-                </div>
-                <div class="product-footer">
-                  <span class="product-price">¥500</span>
-                  <button class="product-btn" onclick="purchaseItem('wallpaper_mobile', 500)">
-                    <span>購入する</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* PC待ち受け */}
-            <div class="product-card" data-category="wallpaper">
-              <div class="product-image">
-                <img src="https://via.placeholder.com/300x200/FFB7C5/FFFFFF?text=💻" alt="PC待ち受け" />
-                <span class="product-badge">デジタル</span>
-              </div>
-              <div class="product-info">
-                <h3 class="product-name">PC待ち受け画像</h3>
-                <p class="product-desc">デスクトップを癒しの空間に</p>
-                <div class="product-specs">
-                  <span class="spec-item">📐 1920x1080px</span>
-                  <span class="spec-item">🎨 高画質PNG</span>
-                </div>
-                <div class="product-footer">
-                  <span class="product-price">¥500</span>
-                  <button class="product-btn" onclick="purchaseItem('wallpaper_pc', 500)">
-                    <span>購入する</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* 待ち受けセット */}
-            <div class="product-card featured" data-category="wallpaper">
-              <div class="product-image">
-                <img src="https://via.placeholder.com/300x300/FFB7C5/FFFFFF?text=📱💻" alt="待ち受けセット" />
-                <span class="product-badge hot">お得セット</span>
-              </div>
-              <div class="product-info">
-                <h3 class="product-name">待ち受けセット</h3>
-                <p class="product-desc">スマホ＋PC両方セットでお得！</p>
-                <div class="product-specs">
-                  <span class="spec-item">📱 スマホ用</span>
-                  <span class="spec-item">💻 PC用</span>
-                </div>
-                <div class="product-footer">
-                  <span class="product-price original">¥1,000</span>
-                  <span class="product-price">¥800</span>
-                  <button class="product-btn primary" onclick="purchaseItem('wallpaper_set', 800)">
-                    <span>購入する</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
             {/* アクリルキーホルダー */}
             <div class="product-card" data-category="goods">
               <div class="product-image">

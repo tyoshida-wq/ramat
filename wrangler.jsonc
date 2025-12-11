@@ -12,5 +12,11 @@
       "database_name": "ramat-production",
       "database_id": "67729e91-73c5-4e7b-8813-be9849b3043d"
     }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "ramat-wallpapers"
+    }
   ]
 }

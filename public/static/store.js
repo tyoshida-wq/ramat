@@ -1,7 +1,254 @@
 // ストアページのJavaScript
 
-// カテゴリーフィルター
-document.addEventListener('DOMContentLoaded', () => {
+// ページ読み込み時に待ち受け画像の状態を確認
+document.addEventListener('DOMContentLoaded', async () => {
+  await checkWallpaperStatus();
+  initializeCategoryFilter();
+});
+
+// 待ち受け画像の状態を確認
+async function checkWallpaperStatus() {
+  try {
+    const response = await fetch('/api/profile', {
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to fetch profile');
+      return;
+    }
+
+    const profile = await response.json();
+    const soulmateId = profile.soulmate?.id;
+
+    if (!soulmateId) {
+      console.log('No soulmate found');
+      return;
+    }
+
+    // 待ち受け画像の状態を取得
+    const wallpaperResponse = await fetch(`/api/wallpapers/${soulmateId}`, {
+      credentials: 'include'
+    });
+
+    if (!wallpaperResponse.ok) {
+      // 待ち受け未生成状態を表示
+      showWallpaperGenerateButton(soulmateId);
+      return;
+    }
+
+    const wallpapers = await wallpaperResponse.json();
+
+    if (wallpapers.exists) {
+      // 生成済みの待ち受けを表示
+      showWallpaperProducts(wallpapers);
+    } else {
+      // 待ち受け未生成状態を表示
+      showWallpaperGenerateButton(soulmateId);
+    }
+
+  } catch (error) {
+    console.error('Failed to check wallpaper status:', error);
+  }
+}
+
+// 待ち受け生成ボタンを表示
+function showWallpaperGenerateButton(soulmateId) {
+  const container = document.getElementById('wallpaperSection');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="wallpaper-hero">
+      <div class="hero-icon">🖼️✨</div>
+      <h2>あなたのソウルメイトの待ち受け画像</h2>
+      <p class="hero-description">
+        スマートフォンとPCの壁紙を生成できます<br>
+        あなたのソウルメイトが美しい背景と共に蘇ります
+      </p>
+      
+      <div class="wallpaper-not-generated">
+        <div class="preview-placeholder">
+          <div class="placeholder-content">
+            <span class="placeholder-icon">📱 💻</span>
+            <p>待ち受け画像はまだ生成されていません</p>
+          </div>
+        </div>
+        
+        <button class="generate-wallpaper-btn" onclick="generateWallpapers('${soulmateId}')">
+          <span class="btn-icon">✨</span>
+          <span class="btn-text">待ち受け画像を生成する</span>
+          <span class="btn-cost">(約¥9)</span>
+        </button>
+        
+        <div class="generation-note">
+          <p>💡 生成には約30〜60秒かかります</p>
+          <p>📱 スマホ用（9:16）とPC用（16:9）の2枚が生成されます</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// 待ち受け画像を生成
+async function generateWallpapers(soulmateId) {
+  try {
+    const container = document.getElementById('wallpaperSection');
+    
+    // 生成中UIを表示
+    container.innerHTML = `
+      <div class="wallpaper-generating">
+        <div class="loading-animation">
+          <div class="spinner"></div>
+          <div class="loading-steps">
+            <div class="step active" id="step1">
+              <span class="step-icon">📱</span>
+              <span class="step-text">スマホ待ち受けを生成中...</span>
+            </div>
+            <div class="step" id="step2">
+              <span class="step-icon">💻</span>
+              <span class="step-text">PC待ち受けを生成中...</span>
+            </div>
+          </div>
+        </div>
+        <p class="generating-message">
+          あなたのソウルメイトの待ち受けを作成しています✨<br>
+          このまましばらくお待ちください（約30〜60秒）
+        </p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="generationProgress"></div>
+        </div>
+      </div>
+    `;
+
+    // プログレスバーアニメーション
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += 1;
+      const progressBar = document.getElementById('generationProgress');
+      if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+      }
+      
+      // ステップ2をアクティブに（50%で切り替え）
+      if (progress === 50) {
+        document.getElementById('step2')?.classList.add('active');
+      }
+      
+      if (progress >= 90) {
+        clearInterval(progressInterval);
+      }
+    }, 600); // 60秒で90%まで到達
+
+    // API呼び出し
+    const response = await fetch('/api/wallpapers/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ soulmateId })
+    });
+
+    clearInterval(progressInterval);
+
+    if (!response.ok) {
+      throw new Error('Generation failed');
+    }
+
+    const result = await response.json();
+
+    if (result.success) {
+      // プログレスバーを100%に
+      const progressBar = document.getElementById('generationProgress');
+      if (progressBar) {
+        progressBar.style.width = '100%';
+      }
+
+      // 完了メッセージを表示
+      setTimeout(() => {
+        alert('✨ 待ち受け画像が生成されました！');
+        location.reload();
+      }, 500);
+    } else {
+      throw new Error(result.error || 'Generation failed');
+    }
+
+  } catch (error) {
+    console.error('Generation failed:', error);
+    alert('❌ 生成に失敗しました。もう一度お試しください。');
+    location.reload();
+  }
+}
+
+// 生成済み待ち受け商品を表示
+function showWallpaperProducts(wallpapers) {
+  const container = document.getElementById('wallpaperSection');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="wallpaper-products">
+      <h2 class="section-title">🖼️ 待ち受け画像</h2>
+      <div class="product-grid">
+        <!-- スマホ待ち受け -->
+        <div class="product-card digital" data-category="wallpaper" data-type="mobile">
+          <div class="product-badge">📱 スマホ用</div>
+          <div class="product-image">
+            <img src="${wallpapers.mobileUrl}" alt="スマホ待ち受け" loading="lazy">
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">スマホ待ち受け</h3>
+            <p class="product-description">1080×1920px 高解像度（9:16）</p>
+            <div class="product-footer">
+              <span class="product-price">¥500</span>
+              <button class="buy-btn" onclick="purchaseItem('wallpaper_mobile', 500)">
+                購入する
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PC待ち受け -->
+        <div class="product-card digital" data-category="wallpaper" data-type="pc">
+          <div class="product-badge">💻 PC用</div>
+          <div class="product-image">
+            <img src="${wallpapers.pcUrl}" alt="PC待ち受け" loading="lazy">
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">PC待ち受け</h3>
+            <p class="product-description">1920×1080px 高解像度（16:9）</p>
+            <div class="product-footer">
+              <span class="product-price">¥500</span>
+              <button class="buy-btn" onclick="purchaseItem('wallpaper_pc', 500)">
+                購入する
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- セット販売 -->
+        <div class="product-card digital featured" data-category="wallpaper" data-type="set">
+          <div class="product-badge popular">🌟 お得セット</div>
+          <div class="product-image dual">
+            <img src="${wallpapers.mobileUrl}" alt="スマホ" class="dual-image" loading="lazy">
+            <img src="${wallpapers.pcUrl}" alt="PC" class="dual-image" loading="lazy">
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">待ち受けセット</h3>
+            <p class="product-description">スマホ＋PC セット割引</p>
+            <div class="product-footer">
+              <span class="product-price original">¥1,000</span>
+              <span class="product-price sale">¥800</span>
+              <button class="buy-btn primary" onclick="purchaseItem('wallpaper_set', 800)">
+                セット購入
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// カテゴリーフィルター初期化
+function initializeCategoryFilter() {
   const categoryTabs = document.querySelectorAll('.category-tab');
   const productCards = document.querySelectorAll('.product-card');
 

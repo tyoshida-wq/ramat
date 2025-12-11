@@ -309,3 +309,239 @@
     transform: scale(1.05);
   }
 }
+
+/* ========================================
+   待ち受け画像セクション
+======================================== */
+.wallpaper-section {
+  margin-bottom: 48px;
+}
+
+.wallpaper-hero {
+  background: white;
+  border-radius: 16px;
+  padding: 40px 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.hero-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.hero-description {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 12px 0 32px;
+}
+
+/* 未生成状態 */
+.wallpaper-not-generated {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.preview-placeholder {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px dashed #dee2e6;
+  border-radius: 12px;
+  padding: 60px 20px;
+  margin-bottom: 24px;
+}
+
+.placeholder-content {
+  text-align: center;
+}
+
+.placeholder-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.placeholder-content p {
+  color: #868e96;
+  font-size: 0.95rem;
+}
+
+.generate-wallpaper-btn {
+  background: linear-gradient(135deg, #FF1493 0%, #FFB6D9 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 16px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(255, 20, 147, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto 24px;
+}
+
+.generate-wallpaper-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 20, 147, 0.4);
+}
+
+.btn-icon {
+  font-size: 1.3rem;
+}
+
+.btn-cost {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-left: 4px;
+}
+
+.generation-note {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: left;
+}
+
+.generation-note p {
+  color: #495057;
+  font-size: 0.9rem;
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+/* 生成中状態 */
+.wallpaper-generating {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.loading-animation {
+  margin-bottom: 32px;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 24px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #FF1493;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.step.active {
+  opacity: 1;
+  background: linear-gradient(135deg, #FFE4E9 0%, #FFF5F7 100%);
+  box-shadow: 0 2px 8px rgba(255, 20, 147, 0.15);
+}
+
+.step-icon {
+  font-size: 1.5rem;
+}
+
+.step-text {
+  color: #495057;
+  font-size: 0.95rem;
+}
+
+.generating-message {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 24px 0;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FF1493 0%, #FFB6D9 100%);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* 生成済み商品 */
+.wallpaper-products {
+  margin-bottom: 48px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 24px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.dual-image {
+  width: 48%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.product-image.dual {
+  display: flex;
+  gap: 4%;
+  justify-content: space-between;
+}
+
+.product-price.original {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.9rem;
+  margin-right: 8px;
+}
+
+.product-price.sale {
+  color: #FF1493;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.buy-btn.primary {
+  background: linear-gradient(135deg, #FF1493 0%, #FFB6D9 100%);
+}
+
+.buy-btn.primary:hover {
+  box-shadow: 0 4px 12px rgba(255, 20, 147, 0.4);
+}
