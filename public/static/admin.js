@@ -484,7 +484,7 @@ function getRelativeTime(datetime) {
   if (diffDays < 7) return `${diffDays}日前`;
   
   return past.toLocaleDateString('ja-JP');
-});
+}
 
 // アニメーション効果
 const observerOptions = {
