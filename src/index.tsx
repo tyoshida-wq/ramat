@@ -237,11 +237,11 @@ app.get('/', (c) => {
 
       <nav class="bottom-nav">
         <a href="/" class="nav-item active">
-          <span class="nav-icon">🏠</span>
-          <span class="nav-label">トップ</span>
+          <span class="nav-icon">⌂</span>
+          <span class="nav-label">ホーム</span>
         </a>
         <a href="/generate" class="nav-item">
-          <span class="nav-icon">✨</span>
+          <span class="nav-icon">◈</span>
           <span class="nav-label">生成</span>
         </a>
         <a href="/chat" class="nav-item">
@@ -253,7 +253,7 @@ app.get('/', (c) => {
           <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon">✱</span>
           <span class="nav-label">管理者</span>
         </a>
       </nav>
@@ -311,11 +311,11 @@ app.get('/generate', (c) => {
 
       <nav class="bottom-nav">
         <a href="/" class="nav-item">
-          <span class="nav-icon">🏠</span>
-          <span class="nav-label">トップ</span>
+          <span class="nav-icon">⌂</span>
+          <span class="nav-label">ホーム</span>
         </a>
         <a href="/generate" class="nav-item active">
-          <span class="nav-icon">✨</span>
+          <span class="nav-icon">◈</span>
           <span class="nav-label">生成</span>
         </a>
         <a href="/chat" class="nav-item">
@@ -327,7 +327,7 @@ app.get('/generate', (c) => {
           <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon">✱</span>
           <span class="nav-label">管理者</span>
         </a>
       </nav>
@@ -391,11 +391,11 @@ app.get('/chat', (c) => {
       {/* 下部ナビゲーション */}
       <nav class="bottom-nav">
         <a href="/" class="nav-item">
-          <span class="nav-icon">🏠</span>
-          <span class="nav-label">トップ</span>
+          <span class="nav-icon">⌂</span>
+          <span class="nav-label">ホーム</span>
         </a>
         <a href="/generate" class="nav-item">
-          <span class="nav-icon">✨</span>
+          <span class="nav-icon">◈</span>
           <span class="nav-label">生成</span>
         </a>
         <a href="/chat" class="nav-item active">
@@ -407,7 +407,7 @@ app.get('/chat', (c) => {
           <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon">✱</span>
           <span class="nav-label">管理者</span>
         </a>
       </nav>
@@ -512,11 +512,11 @@ app.get('/mypage', (c) => {
       {/* 下部ナビゲーション */}
       <nav class="bottom-nav">
         <a href="/" class="nav-item">
-          <span class="nav-icon">🏠</span>
-          <span class="nav-label">トップ</span>
+          <span class="nav-icon">⌂</span>
+          <span class="nav-label">ホーム</span>
         </a>
         <a href="/generate" class="nav-item">
-          <span class="nav-icon">✨</span>
+          <span class="nav-icon">◈</span>
           <span class="nav-label">生成</span>
         </a>
         <a href="/chat" class="nav-item">
@@ -528,7 +528,7 @@ app.get('/mypage', (c) => {
           <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon">✱</span>
           <span class="nav-label">管理者</span>
         </a>
       </nav>
@@ -701,11 +701,11 @@ app.get('/admin', (c) => {
 
       <nav class="bottom-nav">
         <a href="/" class="nav-item">
-          <span class="nav-icon">🏠</span>
-          <span class="nav-label">トップ</span>
+          <span class="nav-icon">⌂</span>
+          <span class="nav-label">ホーム</span>
         </a>
         <a href="/generate" class="nav-item">
-          <span class="nav-icon">✨</span>
+          <span class="nav-icon">◈</span>
           <span class="nav-label">生成</span>
         </a>
         <a href="/chat" class="nav-item">
@@ -717,7 +717,7 @@ app.get('/admin', (c) => {
           <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item active">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon">✱</span>
           <span class="nav-label">管理者</span>
         </a>
       </nav>
