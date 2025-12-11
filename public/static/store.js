@@ -2,6 +2,7 @@
 
 // ページ読み込み時に待ち受け画像の状態を確認
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('[Store] Page loaded, checking wallpaper status...');
   await checkWallpaperStatus();
   initializeCategoryFilter();
 });
@@ -9,67 +10,82 @@ document.addEventListener('DOMContentLoaded', async () => {
 // 待ち受け画像の状態を確認
 async function checkWallpaperStatus() {
   try {
+    console.log('[Store] Fetching user info...');
     // まずユーザーIDを取得
     const userResponse = await fetch('/api/auth/me', {
       credentials: 'include'
     });
     
     if (!userResponse.ok) {
-      console.error('Failed to fetch user info');
+      console.error('[Store] Failed to fetch user info:', userResponse.status);
       return;
     }
 
     const user = await userResponse.json();
     const userId = user.id;
+    console.log('[Store] User ID:', userId);
 
     // ソウルメイト情報を取得
+    console.log('[Store] Fetching soulmate profile...');
     const profileResponse = await fetch(`/api/mypage/profile/${userId}`, {
       credentials: 'include'
     });
     
     if (!profileResponse.ok) {
-      console.log('No soulmate found');
+      console.log('[Store] No soulmate found (profile API failed)');
       return;
     }
 
     const profile = await profileResponse.json();
+    console.log('[Store] Profile:', profile);
     const soulmateId = profile.soulmate?.id;
 
     if (!soulmateId) {
-      console.log('No soulmate found');
+      console.log('[Store] No soulmate found (no soulmate in profile)');
       return;
     }
+    
+    console.log('[Store] Soulmate ID:', soulmateId);
 
     // 待ち受け画像の状態を取得
+    console.log('[Store] Checking wallpaper status...');
     const wallpaperResponse = await fetch(`/api/wallpapers/${soulmateId}`, {
       credentials: 'include'
     });
 
     if (!wallpaperResponse.ok) {
+      console.log('[Store] Wallpaper not generated yet, showing generate button');
       // 待ち受け未生成状態を表示
       showWallpaperGenerateButton(soulmateId);
       return;
     }
 
     const wallpapers = await wallpaperResponse.json();
+    console.log('[Store] Wallpapers:', wallpapers);
 
     if (wallpapers.exists) {
+      console.log('[Store] Wallpapers exist, showing products');
       // 生成済みの待ち受けを表示
       showWallpaperProducts(wallpapers);
     } else {
+      console.log('[Store] Wallpapers not exist, showing generate button');
       // 待ち受け未生成状態を表示
       showWallpaperGenerateButton(soulmateId);
     }
 
   } catch (error) {
-    console.error('Failed to check wallpaper status:', error);
+    console.error('[Store] Failed to check wallpaper status:', error);
   }
 }
 
 // 待ち受け生成ボタンを表示
 function showWallpaperGenerateButton(soulmateId) {
+  console.log('[Store] Showing wallpaper generate button for soulmate:', soulmateId);
   const container = document.getElementById('wallpaperSection');
-  if (!container) return;
+  if (!container) {
+    console.error('[Store] wallpaperSection element not found!');
+    return;
+  }
 
   container.innerHTML = `
     <div class="wallpaper-hero">
