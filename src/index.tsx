@@ -1679,27 +1679,27 @@ app.get('/legal', (c) => {
         
         <section>
           <h2>販売業者</h2>
-          <p>【運営者情報を記載してください】</p>
+          <p>合同会社and.</p>
         </section>
 
         <section>
           <h2>運営責任者</h2>
-          <p>【責任者名を記載してください】</p>
+          <p>吉田　拓未</p>
         </section>
 
         <section>
           <h2>所在地</h2>
-          <p>【住所を記載してください】</p>
+          <p>〒399-0101 長野県諏訪郡富士見町境10555-2</p>
         </section>
 
         <section>
           <h2>電話番号</h2>
-          <p>【電話番号を記載してください】</p>
+          <p>080-3083-6050</p>
         </section>
 
         <section>
           <h2>メールアドレス</h2>
-          <p>【メールアドレスを記載してください】</p>
+          <p>t.yoshida@andllc1108.com</p>
         </section>
 
         <section>
