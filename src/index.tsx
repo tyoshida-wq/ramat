@@ -963,6 +963,25 @@ app.get('/admin', (c) => {
           </div>
         </section>
 
+        {/* お問い合わせ管理 */}
+        <section class="contacts-section">
+          <h2 class="section-title">📧 お問い合わせ管理</h2>
+          <div class="contacts-table">
+            <div class="table-header">
+              <div class="col-contact-id">ID</div>
+              <div class="col-contact-name">名前</div>
+              <div class="col-contact-email">メールアドレス</div>
+              <div class="col-contact-subject">件名</div>
+              <div class="col-contact-status">ステータス</div>
+              <div class="col-contact-date">受信日時</div>
+              <div class="col-actions">操作</div>
+            </div>
+            <div class="table-body" id="contactsTableBody">
+              <div class="loading">読み込み中...</div>
+            </div>
+          </div>
+        </section>
+
         {/* システム設定 */}
         <section class="settings-section">
           <h2 class="section-title">⚙️ システム設定</h2>
@@ -1800,6 +1819,7 @@ app.get('/contact', (c) => {
 app.post('/api/contact', async (c) => {
   try {
     const resendApiKey = c.env.RESEND_API_KEY
+    const db = c.env.DB
     
     if (!resendApiKey) {
       return c.json({ error: 'Resend API key not configured' }, 500)
@@ -1819,6 +1839,22 @@ app.post('/api/contact', async (c) => {
       return c.json({ error: '正しいメールアドレスを入力してください' }, 400)
     }
 
+    // データベースに保存
+    let contactId = null
+    if (db) {
+      try {
+        const result = await db.prepare(
+          'INSERT INTO contacts (name, email, subject, message, status) VALUES (?, ?, ?, ?, ?)'
+        ).bind(name, email, subject, message, 'pending').run()
+        
+        contactId = result.meta.last_row_id
+        console.log('Contact saved to database:', contactId)
+      } catch (dbError) {
+        console.error('Database save error:', dbError)
+        // DB保存エラーでもメール送信は続行
+      }
+    }
+
     // Resend初期化
     const resend = new Resend(resendApiKey)
 
@@ -1829,6 +1865,7 @@ app.post('/api/contact', async (c) => {
       subject: `【Ramat】お問い合わせ: ${subject}`,
       html: `
         <h2>新しいお問い合わせがありました</h2>
+        <p><strong>お問い合わせID:</strong> #${contactId || 'N/A'}</p>
         <p><strong>お名前:</strong> ${name}</p>
         <p><strong>メールアドレス:</strong> ${email}</p>
         <p><strong>件名:</strong> ${subject}</p>
@@ -1836,6 +1873,7 @@ app.post('/api/contact', async (c) => {
         <p>${message.replace(/\n/g, '<br>')}</p>
         <hr>
         <p style="color: #666; font-size: 12px;">このメールはRamatのお問い合わせフォームから送信されました。</p>
+        <p style="color: #666; font-size: 12px;">管理画面: https://ramat.pages.dev/admin</p>
       `
     })
 
@@ -1848,6 +1886,7 @@ app.post('/api/contact', async (c) => {
         <h2>お問い合わせありがとうございます</h2>
         <p>${name} 様</p>
         <p>お問い合わせを受け付けました。内容を確認の上、2〜3営業日以内にご返信いたします。</p>
+        ${contactId ? `<p><strong>お問い合わせ番号:</strong> #${contactId}</p>` : ''}
         <h3>お問い合わせ内容:</h3>
         <p><strong>件名:</strong> ${subject}</p>
         <p>${message.replace(/\n/g, '<br>')}</p>
@@ -1857,18 +1896,120 @@ app.post('/api/contact', async (c) => {
       `
     })
 
-    console.log('Contact form submitted:', { name, email, subject })
+    console.log('Contact form submitted:', { contactId, name, email, subject })
     console.log('Admin email:', adminEmail)
     console.log('User email:', userEmail)
 
     return c.json({ 
       success: true,
+      contactId,
       message: 'お問い合わせを受け付けました。確認メールをご確認ください。'
     })
   } catch (error) {
     console.error('Contact form error:', error)
     return c.json({ 
       error: 'メールの送信に失敗しました。しばらくしてから再度お試しください。',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: お問い合わせ一覧取得（管理者用）
+app.get('/api/admin/contacts', async (c) => {
+  try {
+    const db = c.env.DB
+    
+    if (!db) {
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+
+    // 全てのお問い合わせを取得（最新順）
+    const contacts = await db.prepare(
+      'SELECT id, name, email, subject, message, status, created_at, replied_at FROM contacts ORDER BY created_at DESC LIMIT 100'
+    ).all()
+
+    return c.json({ 
+      success: true,
+      contacts: contacts.results || []
+    })
+  } catch (error) {
+    console.error('Get contacts error:', error)
+    return c.json({ 
+      error: 'お問い合わせ一覧の取得に失敗しました',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: お問い合わせ詳細取得（管理者用）
+app.get('/api/admin/contacts/:id', async (c) => {
+  try {
+    const db = c.env.DB
+    const contactId = c.req.param('id')
+    
+    if (!db) {
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+
+    const contact = await db.prepare(
+      'SELECT * FROM contacts WHERE id = ?'
+    ).bind(contactId).first()
+
+    if (!contact) {
+      return c.json({ error: 'お問い合わせが見つかりません' }, 404)
+    }
+
+    return c.json({ 
+      success: true,
+      contact
+    })
+  } catch (error) {
+    console.error('Get contact error:', error)
+    return c.json({ 
+      error: 'お問い合わせの取得に失敗しました',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: お問い合わせステータス更新（管理者用）
+app.put('/api/admin/contacts/:id/status', async (c) => {
+  try {
+    const db = c.env.DB
+    const contactId = c.req.param('id')
+    const { status, replyMessage } = await c.req.json()
+    
+    if (!db) {
+      return c.json({ error: 'Database not configured' }, 500)
+    }
+
+    // ステータスバリデーション
+    const validStatuses = ['pending', 'replied', 'closed']
+    if (!validStatuses.includes(status)) {
+      return c.json({ error: '無効なステータスです' }, 400)
+    }
+
+    // ステータス更新
+    if (status === 'replied' && replyMessage) {
+      await db.prepare(
+        'UPDATE contacts SET status = ?, replied_at = CURRENT_TIMESTAMP, reply_message = ? WHERE id = ?'
+      ).bind(status, replyMessage, contactId).run()
+    } else {
+      await db.prepare(
+        'UPDATE contacts SET status = ? WHERE id = ?'
+      ).bind(status, contactId).run()
+    }
+
+    console.log('Contact status updated:', { contactId, status })
+
+    return c.json({ 
+      success: true,
+      message: 'ステータスを更新しました'
+    })
+  } catch (error) {
+    console.error('Update contact status error:', error)
+    return c.json({ 
+      error: 'ステータスの更新に失敗しました',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, 500)
   }

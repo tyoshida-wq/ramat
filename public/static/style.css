@@ -755,3 +755,141 @@ body {
     font-size: 0.85rem;
   }
 }
+
+/* お問い合わせ管理セクション */
+.contacts-section {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.contacts-table {
+  overflow-x: auto;
+}
+
+.contacts-table .table-header {
+  display: grid;
+  grid-template-columns: 60px 120px 200px 1fr 100px 120px 120px;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.contacts-table .table-row {
+  display: grid;
+  grid-template-columns: 60px 120px 200px 1fr 100px 120px 120px;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.contacts-table .table-row:hover {
+  background: #f8f9fa;
+}
+
+.col-contact-id {
+  font-weight: 600;
+  color: #666;
+}
+
+.col-contact-name {
+  font-weight: 500;
+}
+
+.col-contact-email {
+  color: #666;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-contact-subject {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-contact-status {
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-replied {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-closed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.col-contact-date {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.icon-btn.reply {
+  background: #007bff;
+  color: white;
+}
+
+.icon-btn.reply:hover {
+  background: #0056b3;
+}
+
+.icon-btn.check {
+  background: #28a745;
+  color: white;
+}
+
+.icon-btn.check:hover {
+  background: #218838;
+}
+
+.icon-btn.close {
+  background: #6c757d;
+  color: white;
+}
+
+.icon-btn.close:hover {
+  background: #5a6268;
+}
+
+@media (max-width: 768px) {
+  .contacts-table .table-header,
+  .contacts-table .table-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .contacts-table .table-header > div:not(:first-child),
+  .contacts-table .table-row > div:not(:first-child) {
+    display: none;
+  }
+  
+  .col-contact-id::before {
+    content: 'ID: ';
+    font-weight: normal;
+  }
+}

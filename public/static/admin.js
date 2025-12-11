@@ -513,4 +513,192 @@ const observer = new IntersectionObserver((entries) => {
 document.addEventListener('DOMContentLoaded', () => {
   const sections = document.querySelectorAll('.stats-section, .quick-actions, .charts-section, .history-section, .settings-section');
   sections.forEach(section => observer.observe(section));
+  
+  // お問い合わせ管理の初期化
+  loadContacts();
 });
+
+// お問い合わせ一覧の読み込み
+async function loadContacts() {
+  try {
+    const response = await fetch('/api/admin/contacts', {
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch contacts');
+    }
+    
+    const data = await response.json();
+    const contactsTableBody = document.getElementById('contactsTableBody');
+    
+    if (!contactsTableBody) return;
+    
+    if (!data.contacts || data.contacts.length === 0) {
+      contactsTableBody.innerHTML = '<div class="no-data">お問い合わせはまだありません</div>';
+      return;
+    }
+    
+    contactsTableBody.innerHTML = data.contacts.map(contact => {
+      const date = new Date(contact.created_at);
+      const formattedDate = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+      
+      const statusClass = {
+        'pending': 'status-pending',
+        'replied': 'status-replied',
+        'closed': 'status-closed'
+      }[contact.status] || 'status-pending';
+      
+      const statusText = {
+        'pending': '未対応',
+        'replied': '返信済み',
+        'closed': '完了'
+      }[contact.status] || '未対応';
+      
+      return `
+        <div class="table-row">
+          <div class="col-contact-id">#${contact.id}</div>
+          <div class="col-contact-name">${escapeHtml(contact.name)}</div>
+          <div class="col-contact-email">${escapeHtml(contact.email)}</div>
+          <div class="col-contact-subject">${escapeHtml(contact.subject)}</div>
+          <div class="col-contact-status">
+            <span class="status-badge ${statusClass}">${statusText}</span>
+          </div>
+          <div class="col-contact-date">${formattedDate}</div>
+          <div class="col-actions">
+            <button class="icon-btn view" onclick="viewContact(${contact.id})" title="詳細">👁️</button>
+            <button class="icon-btn reply" onclick="replyContact(${contact.id})" title="返信">✉️</button>
+            ${contact.status === 'pending' ? 
+              `<button class="icon-btn check" onclick="markAsReplied(${contact.id})" title="返信済みにする">✓</button>` : 
+              `<button class="icon-btn close" onclick="markAsClosed(${contact.id})" title="完了にする">✖</button>`
+            }
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+  } catch (error) {
+    console.error('Failed to load contacts:', error);
+    const contactsTableBody = document.getElementById('contactsTableBody');
+    if (contactsTableBody) {
+      contactsTableBody.innerHTML = '<div class="error">お問い合わせの読み込みに失敗しました</div>';
+    }
+  }
+}
+
+// お問い合わせ詳細表示
+async function viewContact(contactId) {
+  try {
+    const response = await fetch(`/api/admin/contacts/${contactId}`, {
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch contact');
+    }
+    
+    const data = await response.json();
+    const contact = data.contact;
+    
+    const date = new Date(contact.created_at);
+    const formattedDate = date.toLocaleString('ja-JP');
+    
+    alert(`
+【お問い合わせ詳細 #${contact.id}】
+
+お名前: ${contact.name}
+メールアドレス: ${contact.email}
+件名: ${contact.subject}
+受信日時: ${formattedDate}
+ステータス: ${contact.status}
+
+お問い合わせ内容:
+${contact.message}
+
+${contact.reply_message ? `返信内容:\n${contact.reply_message}` : ''}
+    `.trim());
+    
+  } catch (error) {
+    console.error('Failed to view contact:', error);
+    alert('お問い合わせの詳細取得に失敗しました');
+  }
+}
+
+// お問い合わせへの返信
+function replyContact(contactId) {
+  const email = prompt('返信先のメールアドレスに直接メールを送信してください。\n\nこの機能は今後実装予定です。');
+  // TODO: メール返信機能の実装
+}
+
+// 返信済みにする
+async function markAsReplied(contactId) {
+  const replyMessage = prompt('返信内容を入力してください（記録用）:');
+  
+  if (!replyMessage) return;
+  
+  try {
+    const response = await fetch(`/api/admin/contacts/${contactId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        status: 'replied',
+        replyMessage: replyMessage
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to update status');
+    }
+    
+    alert('返信済みにしました');
+    loadContacts(); // リロード
+    
+  } catch (error) {
+    console.error('Failed to mark as replied:', error);
+    alert('ステータスの更新に失敗しました');
+  }
+}
+
+// 完了にする
+async function markAsClosed(contactId) {
+  if (!confirm('このお問い合わせを完了にしますか？')) return;
+  
+  try {
+    const response = await fetch(`/api/admin/contacts/${contactId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        status: 'closed'
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to update status');
+    }
+    
+    alert('完了にしました');
+    loadContacts(); // リロード
+    
+  } catch (error) {
+    console.error('Failed to mark as closed:', error);
+    alert('ステータスの更新に失敗しました');
+  }
+}
+
+// HTMLエスケープ関数
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
