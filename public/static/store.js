@@ -9,16 +9,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 // 待ち受け画像の状態を確認
 async function checkWallpaperStatus() {
   try {
-    const response = await fetch('/api/profile', {
+    // まずユーザーIDを取得
+    const userResponse = await fetch('/api/auth/me', {
       credentials: 'include'
     });
     
-    if (!response.ok) {
-      console.error('Failed to fetch profile');
+    if (!userResponse.ok) {
+      console.error('Failed to fetch user info');
       return;
     }
 
-    const profile = await response.json();
+    const user = await userResponse.json();
+    const userId = user.id;
+
+    // ソウルメイト情報を取得
+    const profileResponse = await fetch(`/api/mypage/profile/${userId}`, {
+      credentials: 'include'
+    });
+    
+    if (!profileResponse.ok) {
+      console.log('No soulmate found');
+      return;
+    }
+
+    const profile = await profileResponse.json();
     const soulmateId = profile.soulmate?.id;
 
     if (!soulmateId) {
