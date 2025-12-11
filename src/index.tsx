@@ -663,20 +663,18 @@ app.get('/store', async (c) => {
                     </div>
                   </div>
                   
-                  <form method="POST" action="/api/wallpapers/generate">
-                    <input type="hidden" name="soulmateId" value={soulmate.id} />
-                    <button type="submit" class="generate-wallpaper-btn">
-                      <span class="btn-icon">✨</span>
-                      <span class="btn-text">待ち受け画像を生成する</span>
-                      <span class="btn-cost">(約¥72)</span>
-                    </button>
-                  </form>
+                  <button class="generate-wallpaper-btn" onclick={`generateWallpaper('${soulmate.id}')`}>
+                    <span class="btn-icon">✨</span>
+                    <span class="btn-text">待ち受け画像を生成する</span>
+                    <span class="btn-cost">(約¥72)</span>
+                  </button>
                   
                   <div class="generation-note">
                     <p>💡 生成には約30〜60秒かかります</p>
                     <p>📱 スマホ用（9:16）とPC用（16:9）の2枚が生成されます</p>
                   </div>
                 </div>
+                <script src="/static/wallpaper-gen.js"></script>
               </div>
             )}
           </section>
@@ -1550,19 +1548,7 @@ app.post('/api/wallpapers/generate', async (c) => {
   try {
     const db = c.env.DB
     const userId = c.get('userId')
-    
-    // JSON または FormData からsoulmateIdを取得
-    let soulmateId: string
-    const contentType = c.req.header('content-type') || ''
-    
-    if (contentType.includes('application/json')) {
-      const body = await c.req.json()
-      soulmateId = body.soulmateId
-    } else {
-      // FormData
-      const formData = await c.req.formData()
-      soulmateId = formData.get('soulmateId') as string
-    }
+    const { soulmateId } = await c.req.json()
 
     console.log(`[Wallpaper Generation] User: ${userId}, Soulmate: ${soulmateId}`)
 
@@ -1635,37 +1621,18 @@ app.post('/api/wallpapers/generate', async (c) => {
     `).bind(soulmateId, mobileUrl, pcUrl).run()
 
     console.log('[Wallpaper Generation] Success!')
-    
-    // FormDataの場合はリダイレクト、JSONの場合はJSON返却
-    if (contentType.includes('application/json')) {
-      return c.json({
-        success: true,
-        mobileUrl,
-        pcUrl
-      })
-    } else {
-      return c.redirect('/store')
-    }
+    return c.json({
+      success: true,
+      mobileUrl,
+      pcUrl
+    })
 
   } catch (error) {
     console.error('[Wallpaper Generation] Error:', error)
-    
-    if (contentType.includes('application/json')) {
-      return c.json({
-        error: 'Failed to generate wallpapers',
-        details: error instanceof Error ? error.message : String(error)
-      }, 500)
-    } else {
-      return c.html(`
-        <html>
-          <body>
-            <h1>エラーが発生しました</h1>
-            <p>${error instanceof Error ? error.message : String(error)}</p>
-            <a href="/store">ストアに戻る</a>
-          </body>
-        </html>
-      `)
-    }
+    return c.json({
+      error: 'Failed to generate wallpapers',
+      details: error instanceof Error ? error.message : String(error)
+    }, 500)
   }
 })
 
