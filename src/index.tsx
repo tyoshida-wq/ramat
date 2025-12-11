@@ -671,6 +671,23 @@ app.get('/admin', (c) => {
           </div>
         </section>
 
+        {/* ユーザー管理 */}
+        <section class="users-section">
+          <h2 class="section-title">👥 ユーザー管理</h2>
+          <div class="users-table">
+            <div class="table-header">
+              <div class="col-user-id">ユーザーID</div>
+              <div class="col-soulmate">ソウルメイト</div>
+              <div class="col-messages">メッセージ数</div>
+              <div class="col-last-active">最終活動</div>
+              <div class="col-actions">操作</div>
+            </div>
+            <div class="table-body" id="usersTableBody">
+              <div class="loading">読み込み中...</div>
+            </div>
+          </div>
+        </section>
+
         {/* システム設定 */}
         <section class="settings-section">
           <h2 class="section-title">⚙️ システム設定</h2>
@@ -686,8 +703,8 @@ app.get('/admin', (c) => {
               <button class="setting-btn">管理する</button>
             </div>
             <div class="setting-card">
-              <h3>👥 ユーザー管理</h3>
-              <p>権限とアクセス制御</p>
+              <h3>📊 メモリーシステム</h3>
+              <p>長期記憶とサマリー管理</p>
               <button class="setting-btn">管理する</button>
             </div>
             <div class="setting-card">
@@ -1597,6 +1614,121 @@ app.get('/api/admin/history', async (c) => {
     console.error('Admin history API error:', error)
     return c.json({ 
       error: 'Failed to fetch admin history',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: ユーザー一覧取得（管理者用）
+app.get('/api/admin/users', async (c) => {
+  try {
+    const { env } = c
+    const db = env.DB
+
+    // 全ユーザー取得
+    const usersResult = await db.prepare(`
+      SELECT 
+        u.id as user_id,
+        u.created_at,
+        u.last_active_at,
+        s.name as soulmate_name,
+        s.animal as soulmate_animal,
+        s.id as soulmate_id,
+        us.total_messages,
+        us.total_conversations
+      FROM users u
+      LEFT JOIN soulmates s ON u.id = s.user_id
+      LEFT JOIN user_stats us ON u.id = us.user_id
+      ORDER BY u.last_active_at DESC
+    `).all()
+
+    const users = usersResult.results.map((row: any) => ({
+      userId: row.user_id,
+      soulmateId: row.soulmate_id,
+      soulmateName: row.soulmate_name || '未生成',
+      soulmateAnimal: row.soulmate_animal || '-',
+      totalMessages: row.total_messages || 0,
+      totalConversations: row.total_conversations || 0,
+      createdAt: row.created_at,
+      lastActiveAt: row.last_active_at
+    }))
+
+    return c.json({
+      success: true,
+      users,
+      total: users.length
+    })
+
+  } catch (error) {
+    console.error('Admin users API error:', error)
+    return c.json({ 
+      error: 'Failed to fetch users',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: ユーザーのメモリー情報取得（管理者用）
+app.get('/api/admin/users/:userId/memory', async (c) => {
+  try {
+    const { env } = c
+    const db = env.DB
+    const userId = c.req.param('userId')
+
+    // ソウルメイトID取得
+    const soulmate = await db.prepare(
+      'SELECT id FROM soulmates WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+    ).bind(userId).first()
+
+    if (!soulmate) {
+      return c.json({ error: 'Soulmate not found' }, 404)
+    }
+
+    const soulmateId = soulmate.id
+
+    // パーソナリティプロファイル取得
+    const personality = await db.prepare(
+      'SELECT * FROM user_personality WHERE user_id = ? AND soulmate_id = ?'
+    ).bind(userId, soulmateId).first()
+
+    // 日次サマリー取得（最新30件）
+    const summaries = await db.prepare(
+      `SELECT date, summary, topics, emotion, message_count 
+       FROM daily_conversation_summary 
+       WHERE user_id = ? AND soulmate_id = ?
+       ORDER BY date DESC
+       LIMIT 30`
+    ).bind(userId, soulmateId).all()
+
+    // 総メッセージ数取得
+    const messageCount = await db.prepare(
+      'SELECT COUNT(*) as count FROM chat_messages WHERE user_id = ? AND soulmate_id = ?'
+    ).bind(userId, soulmateId).first()
+
+    return c.json({
+      success: true,
+      memory: {
+        personality: personality ? {
+          personalitySummary: personality.personality_summary,
+          interests: personality.interests,
+          conversationStyle: personality.conversation_style,
+          updatedAt: personality.updated_at
+        } : null,
+        dailySummaries: summaries.results.map((s: any) => ({
+          date: s.date,
+          summary: s.summary,
+          topics: s.topics,
+          emotion: s.emotion,
+          messageCount: s.message_count
+        })),
+        totalMessages: messageCount?.count || 0
+      }
+    })
+
+  } catch (error) {
+    console.error('Admin user memory API error:', error)
+    return c.json({ 
+      error: 'Failed to fetch user memory',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, 500)
   }

@@ -306,11 +306,173 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   
+  // ユーザー管理の読み込み
+  loadUsers();
+  
   // 自動更新（30秒ごと）
   setInterval(() => {
     loadStats();
     loadHistory();
+    loadUsers();
   }, 30000);
+});
+
+// ユーザー一覧の読み込み
+async function loadUsers() {
+  try {
+    const response = await fetch('/api/admin/users');
+    const data = await response.json();
+    
+    const tbody = document.getElementById('usersTableBody');
+    if (!tbody) return;
+    
+    if (!data.users || data.users.length === 0) {
+      tbody.innerHTML = '<div class="no-data">ユーザーがまだいません</div>';
+      return;
+    }
+    
+    tbody.innerHTML = data.users.map(user => `
+      <div class="table-row">
+        <div class="col-user-id" title="${escapeHtml(user.userId)}">${escapeHtml(user.userId.substring(0, 8))}...</div>
+        <div class="col-soulmate">
+          ${getAnimalEmoji(user.soulmateAnimal)} ${escapeHtml(user.soulmateName)}
+        </div>
+        <div class="col-messages">${user.totalMessages.toLocaleString()}件</div>
+        <div class="col-last-active">${getRelativeTime(user.lastActiveAt)}</div>
+        <div class="col-actions">
+          <button class="icon-btn view" onclick="viewUserMemory('${escapeHtml(user.userId)}', '${escapeHtml(user.soulmateName)}')" title="メモリー情報">🧠</button>
+        </div>
+      </div>
+    `).join('');
+    
+  } catch (error) {
+    console.error('Failed to load users:', error);
+    const tbody = document.getElementById('usersTableBody');
+    if (tbody) {
+      tbody.innerHTML = '<div class="error">ユーザーの読み込みに失敗しました</div>';
+    }
+  }
+}
+
+// ユーザーのメモリー情報を表示
+async function viewUserMemory(userId, soulmateName) {
+  try {
+    const response = await fetch(`/api/admin/users/${userId}/memory`);
+    const data = await response.json();
+    
+    if (!data.success) {
+      alert('メモリー情報の取得に失敗しました');
+      return;
+    }
+    
+    const memory = data.memory;
+    
+    // モーダルの内容を構築
+    let content = `
+      <div class="memory-modal">
+        <h2>🧠 ${escapeHtml(soulmateName)} のメモリー情報</h2>
+        <p class="user-id">ユーザーID: ${escapeHtml(userId.substring(0, 16))}...</p>
+        
+        <div class="memory-section">
+          <h3>📊 統計</h3>
+          <p>総メッセージ数: <strong>${memory.totalMessages.toLocaleString()}件</strong></p>
+        </div>
+        
+        <div class="memory-section">
+          <h3>👤 パーソナリティプロファイル</h3>
+    `;
+    
+    if (memory.personality) {
+      content += `
+        <div class="personality-info">
+          <p><strong>性格:</strong> ${escapeHtml(memory.personality.personalitySummary || '未学習')}</p>
+          <p><strong>趣味・関心:</strong> ${escapeHtml(memory.personality.interests || '未学習')}</p>
+          <p><strong>会話スタイル:</strong> ${escapeHtml(memory.personality.conversationStyle || '未学習')}</p>
+          <p class="updated-at">最終更新: ${getRelativeTime(memory.personality.updatedAt)}</p>
+        </div>
+      `;
+    } else {
+      content += '<p class="no-data">まだパーソナリティは学習されていません（10メッセージ以上で自動学習）</p>';
+    }
+    
+    content += '</div><div class="memory-section"><h3>📅 日次サマリー（過去30日）</h3>';
+    
+    if (memory.dailySummaries && memory.dailySummaries.length > 0) {
+      content += '<div class="summaries-list">';
+      memory.dailySummaries.forEach(summary => {
+        content += `
+          <div class="summary-item">
+            <div class="summary-date">${summary.date}</div>
+            <div class="summary-content">
+              <p><strong>要約:</strong> ${escapeHtml(summary.summary)}</p>
+              <p><strong>トピック:</strong> ${escapeHtml(summary.topics || '-')}</p>
+              <p><strong>感情:</strong> ${escapeHtml(summary.emotion || '-')}</p>
+              <p class="message-count">メッセージ数: ${summary.messageCount}件</p>
+            </div>
+          </div>
+        `;
+      });
+      content += '</div>';
+    } else {
+      content += '<p class="no-data">まだ日次サマリーはありません（前日分を自動生成）</p>';
+    }
+    
+    content += '</div></div>';
+    
+    // モーダルを表示
+    showModal(content);
+    
+  } catch (error) {
+    console.error('Failed to load user memory:', error);
+    alert('メモリー情報の読み込みに失敗しました');
+  }
+}
+
+// モーダル表示
+function showModal(content) {
+  // 既存のモーダルを削除
+  const existingModal = document.querySelector('.modal-overlay');
+  if (existingModal) {
+    existingModal.remove();
+  }
+  
+  // モーダルを作成
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+      ${content}
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // 背景クリックで閉じる
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
+}
+
+// 相対時間表示
+function getRelativeTime(datetime) {
+  if (!datetime) return '不明';
+  
+  const now = new Date();
+  const past = new Date(datetime);
+  const diffMs = now - past;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return 'たった今';
+  if (diffMins < 60) return `${diffMins}分前`;
+  if (diffHours < 24) return `${diffHours}時間前`;
+  if (diffDays < 7) return `${diffDays}日前`;
+  
+  return past.toLocaleDateString('ja-JP');
 });
 
 // アニメーション効果
