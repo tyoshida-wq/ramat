@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie'
+import { serveStatic } from 'hono/cloudflare-workers'
 import { renderer } from './renderer'
 import { animals } from './data/animals'
 import { names } from './data/names'
@@ -25,6 +26,9 @@ const app = new Hono<{ Bindings: Bindings }>()
 
 // JWT Secret（環境変数から取得、なければデフォルト値）
 const JWT_SECRET = 'ramat-jwt-secret-key-change-in-production'
+
+// 静的ファイル配信
+app.use('/static/*', serveStatic({ root: './public' }))
 
 // CORS設定
 app.use('/api/*', cors())
