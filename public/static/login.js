@@ -157,11 +157,26 @@ registerForm.addEventListener('submit', async (e) => {
       // 登録成功
       console.log('登録成功:', data.user);
       
-      // ユーザーIDをLocalStorageに保存（互換性維持）
-      localStorage.setItem('ramat_user_id', data.user.id);
-      
-      // ホームページにリダイレクト
-      window.location.href = '/';
+      // メール認証が必要な場合
+      if (data.emailSent) {
+        // 成功メッセージを表示
+        registerError.style.background = '#d4edda';
+        registerError.style.color = '#155724';
+        registerError.style.border = '1px solid #c3e6cb';
+        showError(registerError, data.message || '登録が完了しました。確認メールを送信しましたので、メールをご確認ください。');
+        
+        // フォームをクリア
+        registerForm.reset();
+        
+        // 5秒後にログインタブに切り替え
+        setTimeout(() => {
+          loginTab.click();
+        }, 5000);
+      } else {
+        // 従来の動作（メール認証なし）
+        localStorage.setItem('ramat_user_id', data.user.id);
+        window.location.href = '/';
+      }
     } else {
       // エラー表示
       showError(registerError, data.error || '登録に失敗しました');

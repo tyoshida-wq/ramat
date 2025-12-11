@@ -1762,6 +1762,33 @@ app.get('/legal', (c) => {
 })
 
 // お問い合わせ
+// メール認証完了ページ
+app.get('/verify-email', (c) => {
+  return c.render(
+    <div class="auth-container">
+      <div class="auth-card">
+        <header class="auth-header">
+          <h1 class="auth-title">🌸 Ramat 🌸</h1>
+          <p class="auth-subtitle">メールアドレスの確認</p>
+        </header>
+
+        <div class="verification-content" id="verificationContent">
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>メールアドレスを確認中...</p>
+          </div>
+        </div>
+
+        <div class="auth-footer" id="verificationFooter" style="display: none;">
+          <a href="/" class="auth-link">ホームに戻る</a>
+        </div>
+      </div>
+
+      <script src="/static/verify-email.js"></script>
+    </div>
+  )
+})
+
 app.get('/contact', (c) => {
   return c.render(
     <div class="legal-container">
@@ -2163,6 +2190,7 @@ app.get('/api/wallpapers/:soulmateId', async (c) => {
 app.post('/api/auth/register', async (c) => {
   try {
     const db = c.env.DB
+    const resendApiKey = c.env.RESEND_API_KEY
     const body = await c.req.json()
     const { email, password, username } = body
 
@@ -2200,25 +2228,59 @@ app.post('/api/auth/register', async (c) => {
     // ユーザーID生成
     const userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9)
 
-    // ユーザー作成
+    // メール認証トークン生成（32文字のランダム文字列）
+    const verificationToken = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+
+    // トークン有効期限（24時間後）
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+
+    // ユーザー作成（email_verified=0, 認証トークン付き）
     await db.prepare(
-      'INSERT INTO users (id, email, password_hash, username, email_verified) VALUES (?, ?, ?, ?, ?)'
-    ).bind(userId, email, passwordHash, username, 0).run()
+      'INSERT INTO users (id, email, password_hash, username, email_verified, verification_token, verification_token_expires) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    ).bind(userId, email, passwordHash, username, 0, verificationToken, expiresAt).run()
 
-    // JWTトークン生成
-    const token = await generateToken(userId, JWT_SECRET)
+    // メール認証リンクを送信
+    if (resendApiKey) {
+      try {
+        const resend = new Resend(resendApiKey)
+        const verificationUrl = `https://ramat.pages.dev/verify-email?token=${verificationToken}`
 
-    // Cookieにトークンを保存（30日間、HttpOnly, Secure）
-    setCookie(c, 'auth_token', token, {
-      maxAge: 30 * 24 * 60 * 60, // 30日間
-      httpOnly: true,
-      secure: true,
-      sameSite: 'Lax',
-      path: '/'
-    })
+        await resend.emails.send({
+          from: 'Ramat <onboarding@resend.dev>',
+          to: email,
+          subject: '【Ramat】メールアドレスの確認',
+          html: `
+            <h2>Ramatへようこそ！</h2>
+            <p>${username} 様</p>
+            <p>ご登録ありがとうございます。以下のリンクをクリックして、メールアドレスを確認してください。</p>
+            <p style="margin: 2rem 0;">
+              <a href="${verificationUrl}" style="display: inline-block; padding: 12px 24px; background: #FF69B4; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+                メールアドレスを確認する
+              </a>
+            </p>
+            <p style="color: #666; font-size: 0.9rem;">または、以下のURLをコピーしてブラウザに貼り付けてください：</p>
+            <p style="color: #666; font-size: 0.9rem; word-break: break-all;">${verificationUrl}</p>
+            <hr style="margin: 2rem 0;">
+            <p style="color: #999; font-size: 0.8rem;">このリンクは24時間有効です。</p>
+            <p style="color: #999; font-size: 0.8rem;">このメールに心当たりがない場合は、無視してください。</p>
+            <p style="color: #999; font-size: 0.8rem;">Ramat - あなたの守護動物チャット</p>
+          `
+        })
 
+        console.log('Verification email sent to:', email)
+      } catch (emailError) {
+        console.error('Failed to send verification email:', emailError)
+        // メール送信失敗してもユーザー登録は継続
+      }
+    }
+
+    // 注意: メール認証前なのでログインはさせない（トークン発行なし）
     return c.json({
       success: true,
+      message: '登録が完了しました。確認メールを送信しましたので、メールをご確認ください。',
+      emailSent: true,
       user: {
         id: userId,
         email,
@@ -2304,6 +2366,160 @@ app.post('/api/auth/logout', (c) => {
   })
 
   return c.json({ success: true })
+})
+
+// API: メール認証
+app.get('/api/auth/verify-email', async (c) => {
+  try {
+    const db = c.env.DB
+    const token = c.req.query('token')
+
+    if (!token) {
+      return c.json({ error: '認証トークンが指定されていません' }, 400)
+    }
+
+    // トークンでユーザーを検索
+    const user = await db.prepare(
+      'SELECT id, email, username, email_verified, verification_token_expires FROM users WHERE verification_token = ?'
+    ).bind(token).first()
+
+    if (!user) {
+      return c.json({ error: '無効な認証トークンです' }, 404)
+    }
+
+    // 既に認証済み
+    if (user.email_verified === 1) {
+      return c.json({ 
+        success: true,
+        message: 'このメールアドレスは既に認証済みです',
+        alreadyVerified: true
+      })
+    }
+
+    // トークンの有効期限チェック
+    const expiresAt = new Date(user.verification_token_expires)
+    if (expiresAt < new Date()) {
+      return c.json({ error: '認証トークンの有効期限が切れています。再度登録してください。' }, 410)
+    }
+
+    // メール認証を完了
+    await db.prepare(
+      'UPDATE users SET email_verified = 1, verification_token = NULL, verification_token_expires = NULL WHERE id = ?'
+    ).bind(user.id).run()
+
+    // JWTトークン生成（自動ログイン）
+    const jwtToken = await generateToken(user.id, JWT_SECRET)
+
+    // Cookieにトークンを保存
+    setCookie(c, 'auth_token', jwtToken, {
+      maxAge: 30 * 24 * 60 * 60, // 30日間
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Lax',
+      path: '/'
+    })
+
+    console.log('Email verified for user:', user.email)
+
+    return c.json({
+      success: true,
+      message: 'メールアドレスの認証が完了しました！',
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username
+      }
+    })
+
+  } catch (error) {
+    console.error('Email verification error:', error)
+    return c.json({ 
+      error: 'メール認証処理に失敗しました',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// API: 認証メール再送信
+app.post('/api/auth/resend-verification', async (c) => {
+  try {
+    const db = c.env.DB
+    const resendApiKey = c.env.RESEND_API_KEY
+    const body = await c.req.json()
+    const { email } = body
+
+    if (!email) {
+      return c.json({ error: 'メールアドレスは必須です' }, 400)
+    }
+
+    // ユーザー検索
+    const user = await db.prepare(
+      'SELECT id, email, username, email_verified FROM users WHERE email = ?'
+    ).bind(email).first()
+
+    if (!user) {
+      return c.json({ error: 'このメールアドレスは登録されていません' }, 404)
+    }
+
+    // 既に認証済み
+    if (user.email_verified === 1) {
+      return c.json({ error: 'このメールアドレスは既に認証済みです' }, 400)
+    }
+
+    // 新しい認証トークン生成
+    const verificationToken = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+
+    // トークン有効期限（24時間後）
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+
+    // トークン更新
+    await db.prepare(
+      'UPDATE users SET verification_token = ?, verification_token_expires = ? WHERE id = ?'
+    ).bind(verificationToken, expiresAt, user.id).run()
+
+    // 認証メール送信
+    if (resendApiKey) {
+      const resend = new Resend(resendApiKey)
+      const verificationUrl = `https://ramat.pages.dev/verify-email?token=${verificationToken}`
+
+      await resend.emails.send({
+        from: 'Ramat <onboarding@resend.dev>',
+        to: email,
+        subject: '【Ramat】メールアドレスの確認（再送）',
+        html: `
+          <h2>Ramatへようこそ！</h2>
+          <p>${user.username} 様</p>
+          <p>メールアドレス確認メールを再送信しました。以下のリンクをクリックして、メールアドレスを確認してください。</p>
+          <p style="margin: 2rem 0;">
+            <a href="${verificationUrl}" style="display: inline-block; padding: 12px 24px; background: #FF69B4; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+              メールアドレスを確認する
+            </a>
+          </p>
+          <p style="color: #666; font-size: 0.9rem;">または、以下のURLをコピーしてブラウザに貼り付けてください：</p>
+          <p style="color: #666; font-size: 0.9rem; word-break: break-all;">${verificationUrl}</p>
+          <hr style="margin: 2rem 0;">
+          <p style="color: #999; font-size: 0.8rem;">このリンクは24時間有効です。</p>
+          <p style="color: #999; font-size: 0.8rem;">Ramat - あなたの守護動物チャット</p>
+        `
+      })
+
+      console.log('Verification email resent to:', email)
+    }
+
+    return c.json({
+      success: true,
+      message: '確認メールを再送信しました。メールをご確認ください。'
+    })
+
+  } catch (error) {
+    console.error('Resend verification error:', error)
+    return c.json({ 
+      error: '確認メールの再送信に失敗しました',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
 })
 
 // API: 現在のユーザー情報取得
