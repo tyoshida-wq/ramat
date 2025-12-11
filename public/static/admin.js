@@ -272,6 +272,29 @@ document.addEventListener('DOMContentLoaded', () => {
   actionButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
       const text = e.currentTarget.textContent.trim();
+      
+      // 履歴確認ボタンの場合は履歴セクションへスクロール
+      if (text.includes('履歴確認')) {
+        const historySection = document.querySelector('.history-section');
+        if (historySection) {
+          historySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // ハイライト効果
+          historySection.style.transition = 'all 0.3s ease';
+          historySection.style.transform = 'scale(1.02)';
+          setTimeout(() => {
+            historySection.style.transform = 'scale(1)';
+          }, 300);
+        }
+        return;
+      }
+      
+      // 新規生成ボタンの場合は生成ページへ遷移
+      if (text.includes('新規生成')) {
+        window.location.href = '/generate';
+        return;
+      }
+      
+      // その他のボタンは未実装アラート
       alert(`${text}\n\n※ 実装予定の機能です`);
     });
   });
