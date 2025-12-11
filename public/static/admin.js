@@ -293,9 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/generate';
         return;
       }
-      
-      // その他のボタンは未実装アラート
-      alert(`${text}\n\n※ 実装予定の機能です`);
     });
   });
   

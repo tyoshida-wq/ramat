@@ -635,14 +635,6 @@ app.get('/admin', (c) => {
               <span class="btn-icon">📜</span>
               <span>履歴確認</span>
             </button>
-            <button class="action-btn info">
-              <span class="btn-icon">💾</span>
-              <span>データ保存</span>
-            </button>
-            <button class="action-btn warning">
-              <span class="btn-icon">🔄</span>
-              <span>システム更新</span>
-            </button>
           </div>
         </section>
 
