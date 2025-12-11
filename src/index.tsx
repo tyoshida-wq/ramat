@@ -240,6 +240,18 @@ app.get('/', (c) => {
         </section>
       </main>
 
+      <footer class="site-footer">
+        <div class="footer-content">
+          <div class="footer-links">
+            <a href="/privacy">プライバシーポリシー</a>
+            <a href="/terms">利用規約</a>
+            <a href="/legal">特定商取引法</a>
+            <a href="/contact">お問い合わせ</a>
+          </div>
+          <p class="footer-copyright">&copy; 2025 Ramat. All rights reserved.</p>
+        </div>
+      </footer>
+
       <nav class="bottom-nav">
         <a href="/" class="nav-item active">
           <span class="nav-icon">⌂</span>
@@ -1537,6 +1549,241 @@ app.post('/api/mypage/stats', async (c) => {
       details: error instanceof Error ? error.message : 'Unknown error'
     }, 500)
   }
+})
+
+// ========================================
+// 法的ページ
+// ========================================
+
+// プライバシーポリシー
+app.get('/privacy', (c) => {
+  return c.render(
+    <div class="legal-container">
+      <div class="legal-content">
+        <h1>プライバシーポリシー</h1>
+        <p class="update-date">最終更新日: 2025年12月11日</p>
+        
+        <section>
+          <h2>1. 個人情報の収集</h2>
+          <p>Ramat（以下「当サービス」）では、以下の個人情報を収集します：</p>
+          <ul>
+            <li>メールアドレス</li>
+            <li>ユーザー名</li>
+            <li>生成されたコンテンツ（ソウルメイト画像、チャット履歴）</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>2. 個人情報の利用目的</h2>
+          <p>収集した個人情報は以下の目的で利用します：</p>
+          <ul>
+            <li>サービスの提供・運営</li>
+            <li>ユーザー認証</li>
+            <li>お問い合わせ対応</li>
+            <li>サービス改善のための分析</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>3. 個人情報の第三者提供</h2>
+          <p>当サービスは、以下の場合を除き、個人情報を第三者に提供しません：</p>
+          <ul>
+            <li>ユーザーの同意がある場合</li>
+            <li>法令に基づく場合</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>4. Cookie</h2>
+          <p>当サービスでは、認証のためにCookieを使用します。</p>
+        </section>
+
+        <section>
+          <h2>5. お問い合わせ</h2>
+          <p>プライバシーポリシーに関するお問い合わせは、<a href="/contact">お問い合わせフォーム</a>よりご連絡ください。</p>
+        </section>
+      </div>
+      
+      <nav class="bottom-nav">
+        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>ホーム</span></a>
+        <a href="/generate" class="nav-item"><i class="fas fa-star"></i><span>生成</span></a>
+        <a href="/chat" class="nav-item"><i class="fas fa-comment"></i><span>チャット</span></a>
+        <a href="/mypage" class="nav-item"><i class="fas fa-user"></i><span>マイページ</span></a>
+      </nav>
+    </div>
+  )
+})
+
+// 利用規約
+app.get('/terms', (c) => {
+  return c.render(
+    <div class="legal-container">
+      <div class="legal-content">
+        <h1>利用規約</h1>
+        <p class="update-date">最終更新日: 2025年12月11日</p>
+        
+        <section>
+          <h2>第1条（適用）</h2>
+          <p>本規約は、Ramat（以下「当サービス」）の利用に関する条件を定めるものです。</p>
+        </section>
+
+        <section>
+          <h2>第2条（禁止事項）</h2>
+          <p>ユーザーは、以下の行為を行ってはなりません：</p>
+          <ul>
+            <li>法令または公序良俗に反する行為</li>
+            <li>犯罪行為に関連する行為</li>
+            <li>当サービスの運営を妨害する行為</li>
+            <li>他のユーザーに迷惑をかける行為</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>第3条（知的財産権）</h2>
+          <p>生成されたコンテンツの著作権は、ユーザーに帰属します。ただし、当サービスはサービス改善のために利用する権利を有します。</p>
+        </section>
+
+        <section>
+          <h2>第4条（免責事項）</h2>
+          <p>当サービスは、以下について一切の責任を負いません：</p>
+          <ul>
+            <li>サービスの中断、停止、終了</li>
+            <li>生成されたコンテンツの内容</li>
+            <li>ユーザー間のトラブル</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>第5条（規約の変更）</h2>
+          <p>当サービスは、必要に応じて本規約を変更することができます。</p>
+        </section>
+      </div>
+      
+      <nav class="bottom-nav">
+        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>ホーム</span></a>
+        <a href="/generate" class="nav-item"><i class="fas fa-star"></i><span>生成</span></a>
+        <a href="/chat" class="nav-item"><i class="fas fa-comment"></i><span>チャット</span></a>
+        <a href="/mypage" class="nav-item"><i class="fas fa-user"></i><span>マイページ</span></a>
+      </nav>
+    </div>
+  )
+})
+
+// 特定商取引法に基づく表記
+app.get('/legal', (c) => {
+  return c.render(
+    <div class="legal-container">
+      <div class="legal-content">
+        <h1>特定商取引法に基づく表記</h1>
+        <p class="update-date">最終更新日: 2025年12月11日</p>
+        
+        <section>
+          <h2>販売業者</h2>
+          <p>【運営者情報を記載してください】</p>
+        </section>
+
+        <section>
+          <h2>運営責任者</h2>
+          <p>【責任者名を記載してください】</p>
+        </section>
+
+        <section>
+          <h2>所在地</h2>
+          <p>【住所を記載してください】</p>
+        </section>
+
+        <section>
+          <h2>電話番号</h2>
+          <p>【電話番号を記載してください】</p>
+        </section>
+
+        <section>
+          <h2>メールアドレス</h2>
+          <p>【メールアドレスを記載してください】</p>
+        </section>
+
+        <section>
+          <h2>販売価格</h2>
+          <p>各商品ページに記載の通り</p>
+        </section>
+
+        <section>
+          <h2>支払方法</h2>
+          <p>クレジットカード決済（実装予定）</p>
+        </section>
+
+        <section>
+          <h2>商品代金以外の必要料金</h2>
+          <p>なし</p>
+        </section>
+
+        <section>
+          <h2>引渡時期</h2>
+          <p>デジタルコンテンツ：決済完了後、即時ダウンロード可能<br />
+          物理商品：決済完了後、7-14営業日以内に発送</p>
+        </section>
+
+        <section>
+          <h2>返品・交換</h2>
+          <p>デジタルコンテンツの性質上、返品・返金は原則として受け付けておりません。<br />
+          物理商品の不良品については、到着後7日以内にご連絡ください。</p>
+        </section>
+      </div>
+      
+      <nav class="bottom-nav">
+        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>ホーム</span></a>
+        <a href="/generate" class="nav-item"><i class="fas fa-star"></i><span>生成</span></a>
+        <a href="/chat" class="nav-item"><i class="fas fa-comment"></i><span>チャット</span></a>
+        <a href="/mypage" class="nav-item"><i class="fas fa-user"></i><span>マイページ</span></a>
+      </nav>
+    </div>
+  )
+})
+
+// お問い合わせ
+app.get('/contact', (c) => {
+  return c.render(
+    <div class="legal-container">
+      <div class="legal-content">
+        <h1>お問い合わせ</h1>
+        
+        <section>
+          <p>サービスに関するお問い合わせは、以下のフォームよりご連絡ください。</p>
+          
+          <form class="contact-form" action="/api/contact" method="POST">
+            <div class="form-group">
+              <label>お名前 <span class="required">必須</span></label>
+              <input type="text" name="name" required />
+            </div>
+            
+            <div class="form-group">
+              <label>メールアドレス <span class="required">必須</span></label>
+              <input type="email" name="email" required />
+            </div>
+            
+            <div class="form-group">
+              <label>件名 <span class="required">必須</span></label>
+              <input type="text" name="subject" required />
+            </div>
+            
+            <div class="form-group">
+              <label>お問い合わせ内容 <span class="required">必須</span></label>
+              <textarea name="message" rows="10" required></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn">送信する</button>
+          </form>
+        </section>
+      </div>
+      
+      <nav class="bottom-nav">
+        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>ホーム</span></a>
+        <a href="/generate" class="nav-item"><i class="fas fa-star"></i><span>生成</span></a>
+        <a href="/chat" class="nav-item"><i class="fas fa-comment"></i><span>チャット</span></a>
+        <a href="/mypage" class="nav-item"><i class="fas fa-user"></i><span>マイページ</span></a>
+      </nav>
+    </div>
+  )
 })
 
 // ========================================

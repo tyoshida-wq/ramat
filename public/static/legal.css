@@ -1,0 +1,151 @@
+/* ========================================
+   法的ページ
+======================================== */
+.legal-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FFF5F7 0%, #FFE4E9 100%);
+  padding-bottom: 80px;
+}
+
+.legal-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.legal-content h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.update-date {
+  color: #999;
+  font-size: 0.9rem;
+  margin-bottom: 32px;
+}
+
+.legal-content section {
+  margin-bottom: 32px;
+}
+
+.legal-content h2 {
+  font-size: 1.3rem;
+  color: #444;
+  margin-bottom: 12px;
+  font-weight: 600;
+  border-left: 4px solid #FFB6D9;
+  padding-left: 12px;
+}
+
+.legal-content p {
+  color: #666;
+  line-height: 1.8;
+  margin-bottom: 12px;
+}
+
+.legal-content ul {
+  list-style: disc;
+  margin-left: 24px;
+  color: #666;
+  line-height: 1.8;
+}
+
+.legal-content ul li {
+  margin-bottom: 8px;
+}
+
+.legal-content a {
+  color: #FF1493;
+  text-decoration: underline;
+}
+
+.legal-content a:hover {
+  opacity: 0.8;
+}
+
+/* お問い合わせフォーム */
+.contact-form {
+  margin-top: 24px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  color: #444;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.required {
+  color: #FF1493;
+  font-size: 0.85rem;
+  margin-left: 4px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #FFB6D9;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #FF1493 0%, #FFB6D9 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 16px 48px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(255, 20, 147, 0.3);
+  display: block;
+  margin: 32px auto 0;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 20, 147, 0.4);
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .legal-content {
+    padding: 24px 16px;
+    margin-top: 10px;
+  }
+
+  .legal-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .legal-content h2 {
+    font-size: 1.1rem;
+  }
+}
