@@ -552,7 +552,29 @@ app.get('/mypage', (c) => {
 })
 
 // ストアページ
-app.get('/store', (c) => {
+app.get('/store', async (c) => {
+  const db = c.env.DB
+  const userId = c.get('userId')
+
+  // ユーザーのソウルメイト情報を取得
+  let soulmate = null
+  let wallpapers = null
+  
+  try {
+    soulmate = await db.prepare(
+      'SELECT * FROM soulmates WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+    ).bind(userId).first()
+
+    if (soulmate) {
+      // 待ち受け画像の状態を確認
+      wallpapers = await db.prepare(
+        'SELECT * FROM soulmate_wallpapers WHERE soulmate_id = ? ORDER BY created_at DESC LIMIT 1'
+      ).bind(soulmate.id).first()
+    }
+  } catch (error) {
+    console.error('Failed to fetch store data:', error)
+  }
+
   return c.render(
     <div class="store-container">
       <header class="store-header">
@@ -561,10 +583,104 @@ app.get('/store', (c) => {
       </header>
 
       <main class="store-main">
-        {/* 待ち受け画像セクション（動的生成） */}
-        <section class="wallpaper-section" id="wallpaperSection">
-          {/* ここに待ち受け生成ボタンまたは商品が表示される */}
-        </section>
+        {/* 待ち受け画像セクション */}
+        {soulmate ? (
+          <section class="wallpaper-section">
+            {wallpapers ? (
+              // 生成済み
+              <div class="wallpaper-products">
+                <h2 class="section-title">🖼️ 待ち受け画像</h2>
+                <div class="product-grid">
+                  <div class="product-card digital">
+                    <div class="product-badge">📱 スマホ用</div>
+                    <div class="product-image">
+                      <img src={wallpapers.mobile_wallpaper_url} alt="スマホ待ち受け" loading="lazy" />
+                    </div>
+                    <div class="product-info">
+                      <h3 class="product-name">スマホ待ち受け</h3>
+                      <p class="product-description">1080×1920px 高解像度（9:16）</p>
+                      <div class="product-footer">
+                        <span class="product-price">¥500</span>
+                        <button class="buy-btn" onclick="purchaseItem('wallpaper_mobile', 500)">
+                          購入する
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="product-card digital">
+                    <div class="product-badge">💻 PC用</div>
+                    <div class="product-image">
+                      <img src={wallpapers.pc_wallpaper_url} alt="PC待ち受け" loading="lazy" />
+                    </div>
+                    <div class="product-info">
+                      <h3 class="product-name">PC待ち受け</h3>
+                      <p class="product-description">1920×1080px 高解像度（16:9）</p>
+                      <div class="product-footer">
+                        <span class="product-price">¥500</span>
+                        <button class="buy-btn" onclick="purchaseItem('wallpaper_pc', 500)">
+                          購入する
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="product-card digital featured">
+                    <div class="product-badge popular">🌟 お得セット</div>
+                    <div class="product-image dual">
+                      <img src={wallpapers.mobile_wallpaper_url} alt="スマホ" class="dual-image" loading="lazy" />
+                      <img src={wallpapers.pc_wallpaper_url} alt="PC" class="dual-image" loading="lazy" />
+                    </div>
+                    <div class="product-info">
+                      <h3 class="product-name">待ち受けセット</h3>
+                      <p class="product-description">スマホ＋PC セット割引</p>
+                      <div class="product-footer">
+                        <span class="product-price original">¥1,000</span>
+                        <span class="product-price sale">¥800</span>
+                        <button class="buy-btn primary" onclick="purchaseItem('wallpaper_set', 800)">
+                          セット購入
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // 未生成
+              <div class="wallpaper-hero">
+                <div class="hero-icon">🖼️✨</div>
+                <h2>あなたのソウルメイトの待ち受け画像</h2>
+                <p class="hero-description">
+                  スマートフォンとPCの壁紙を生成できます<br />
+                  あなたのソウルメイトが美しい背景と共に蘇ります
+                </p>
+                
+                <div class="wallpaper-not-generated">
+                  <div class="preview-placeholder">
+                    <div class="placeholder-content">
+                      <span class="placeholder-icon">📱 💻</span>
+                      <p>待ち受け画像はまだ生成されていません</p>
+                    </div>
+                  </div>
+                  
+                  <form method="POST" action="/api/wallpapers/generate">
+                    <input type="hidden" name="soulmateId" value={soulmate.id} />
+                    <button type="submit" class="generate-wallpaper-btn">
+                      <span class="btn-icon">✨</span>
+                      <span class="btn-text">待ち受け画像を生成する</span>
+                      <span class="btn-cost">(約¥72)</span>
+                    </button>
+                  </form>
+                  
+                  <div class="generation-note">
+                    <p>💡 生成には約30〜60秒かかります</p>
+                    <p>📱 スマホ用（9:16）とPC用（16:9）の2枚が生成されます</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        ) : null}
 
         {/* 商品カテゴリー */}
         <section class="category-section">
@@ -1434,7 +1550,19 @@ app.post('/api/wallpapers/generate', async (c) => {
   try {
     const db = c.env.DB
     const userId = c.get('userId')
-    const { soulmateId } = await c.req.json()
+    
+    // JSON または FormData からsoulmateIdを取得
+    let soulmateId: string
+    const contentType = c.req.header('content-type') || ''
+    
+    if (contentType.includes('application/json')) {
+      const body = await c.req.json()
+      soulmateId = body.soulmateId
+    } else {
+      // FormData
+      const formData = await c.req.formData()
+      soulmateId = formData.get('soulmateId') as string
+    }
 
     console.log(`[Wallpaper Generation] User: ${userId}, Soulmate: ${soulmateId}`)
 
@@ -1507,18 +1635,37 @@ app.post('/api/wallpapers/generate', async (c) => {
     `).bind(soulmateId, mobileUrl, pcUrl).run()
 
     console.log('[Wallpaper Generation] Success!')
-    return c.json({
-      success: true,
-      mobileUrl,
-      pcUrl
-    })
+    
+    // FormDataの場合はリダイレクト、JSONの場合はJSON返却
+    if (contentType.includes('application/json')) {
+      return c.json({
+        success: true,
+        mobileUrl,
+        pcUrl
+      })
+    } else {
+      return c.redirect('/store')
+    }
 
   } catch (error) {
     console.error('[Wallpaper Generation] Error:', error)
-    return c.json({
-      error: 'Failed to generate wallpapers',
-      details: error instanceof Error ? error.message : String(error)
-    }, 500)
+    
+    if (contentType.includes('application/json')) {
+      return c.json({
+        error: 'Failed to generate wallpapers',
+        details: error instanceof Error ? error.message : String(error)
+      }, 500)
+    } else {
+      return c.html(`
+        <html>
+          <body>
+            <h1>エラーが発生しました</h1>
+            <p>${error instanceof Error ? error.message : String(error)}</p>
+            <a href="/store">ストアに戻る</a>
+          </body>
+        </html>
+      `)
+    }
   }
 })
 
