@@ -15,9 +15,11 @@ import {
   validatePassword,
   validateUsername
 } from './utils/auth'
+import { Resend } from 'resend'
 
 type Bindings = {
   GEMINI_API_KEY: string
+  RESEND_API_KEY: string
   DB: D1Database
   R2: R2Bucket
 }
@@ -1750,29 +1752,33 @@ app.get('/contact', (c) => {
         <section>
           <p>サービスに関するお問い合わせは、以下のフォームよりご連絡ください。</p>
           
-          <form class="contact-form" action="/api/contact" method="POST">
+          <form class="contact-form" id="contactForm">
             <div class="form-group">
               <label>お名前 <span class="required">必須</span></label>
-              <input type="text" name="name" required />
+              <input type="text" name="name" id="contactName" required />
             </div>
             
             <div class="form-group">
               <label>メールアドレス <span class="required">必須</span></label>
-              <input type="email" name="email" required />
+              <input type="email" name="email" id="contactEmail" required />
             </div>
             
             <div class="form-group">
               <label>件名 <span class="required">必須</span></label>
-              <input type="text" name="subject" required />
+              <input type="text" name="subject" id="contactSubject" required />
             </div>
             
             <div class="form-group">
               <label>お問い合わせ内容 <span class="required">必須</span></label>
-              <textarea name="message" rows="10" required></textarea>
+              <textarea name="message" id="contactMessage" rows="10" required></textarea>
             </div>
             
-            <button type="submit" class="submit-btn">送信する</button>
+            <div id="contactStatus" style="margin-bottom: 1rem; display: none;"></div>
+            
+            <button type="submit" class="submit-btn" id="contactSubmitBtn">送信する</button>
           </form>
+          
+          <script src="/static/contact.js"></script>
         </section>
       </div>
       
@@ -1784,6 +1790,88 @@ app.get('/contact', (c) => {
       </nav>
     </div>
   )
+})
+
+// ========================================
+// お問い合わせAPI
+// ========================================
+
+// API: お問い合わせフォーム送信
+app.post('/api/contact', async (c) => {
+  try {
+    const resendApiKey = c.env.RESEND_API_KEY
+    
+    if (!resendApiKey) {
+      return c.json({ error: 'Resend API key not configured' }, 500)
+    }
+
+    const body = await c.req.json()
+    const { name, email, subject, message } = body
+
+    // バリデーション
+    if (!name || !email || !subject || !message) {
+      return c.json({ error: '全ての項目を入力してください' }, 400)
+    }
+
+    // メールアドレスの簡易バリデーション
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return c.json({ error: '正しいメールアドレスを入力してください' }, 400)
+    }
+
+    // Resend初期化
+    const resend = new Resend(resendApiKey)
+
+    // 管理者宛メール
+    const adminEmail = await resend.emails.send({
+      from: 'Ramat Contact <onboarding@resend.dev>',
+      to: 't.yoshida@andllc1108.com',
+      subject: `【Ramat】お問い合わせ: ${subject}`,
+      html: `
+        <h2>新しいお問い合わせがありました</h2>
+        <p><strong>お名前:</strong> ${name}</p>
+        <p><strong>メールアドレス:</strong> ${email}</p>
+        <p><strong>件名:</strong> ${subject}</p>
+        <h3>お問い合わせ内容:</h3>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+        <hr>
+        <p style="color: #666; font-size: 12px;">このメールはRamatのお問い合わせフォームから送信されました。</p>
+      `
+    })
+
+    // ユーザー宛確認メール
+    const userEmail = await resend.emails.send({
+      from: 'Ramat <onboarding@resend.dev>',
+      to: email,
+      subject: '【Ramat】お問い合わせを受け付けました',
+      html: `
+        <h2>お問い合わせありがとうございます</h2>
+        <p>${name} 様</p>
+        <p>お問い合わせを受け付けました。内容を確認の上、2〜3営業日以内にご返信いたします。</p>
+        <h3>お問い合わせ内容:</h3>
+        <p><strong>件名:</strong> ${subject}</p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+        <hr>
+        <p style="color: #666; font-size: 12px;">このメールに心当たりがない場合は、お手数ですが破棄してください。</p>
+        <p style="color: #666; font-size: 12px;">Ramat - あなたの守護動物チャット</p>
+      `
+    })
+
+    console.log('Contact form submitted:', { name, email, subject })
+    console.log('Admin email:', adminEmail)
+    console.log('User email:', userEmail)
+
+    return c.json({ 
+      success: true,
+      message: 'お問い合わせを受け付けました。確認メールをご確認ください。'
+    })
+  } catch (error) {
+    console.error('Contact form error:', error)
+    return c.json({ 
+      error: 'メールの送信に失敗しました。しばらくしてから再度お試しください。',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
 })
 
 // ========================================
