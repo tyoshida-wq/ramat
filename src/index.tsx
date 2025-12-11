@@ -863,23 +863,55 @@ app.post('/api/chat/send', async (c) => {
     const name = soulmate.name || 'ソウルメイト'
     const concept = soulmate.concept || '守護動物'
 
-    // 過去の会話履歴を取得（最新10件）
-    const chatHistory = await db.prepare(
+    // 【長期記憶】ユーザーのパーソナリティプロファイル取得
+    const userProfile = await db.prepare(
+      'SELECT personality_summary, interests, conversation_style FROM user_personality WHERE user_id = ? AND soulmate_id = ?'
+    ).bind(userId, soulmate.id).first()
+
+    // 【中期記憶】過去30日分の日次サマリー取得
+    const dailySummaries = await db.prepare(
+      `SELECT date, summary, topics, emotion FROM daily_conversation_summary 
+       WHERE user_id = ? AND soulmate_id = ? 
+       AND date >= date('now', '-30 days')
+       ORDER BY date DESC`
+    ).bind(userId, soulmate.id).all()
+
+    // 【短期記憶】今日の直近10件の会話取得
+    const recentMessages = await db.prepare(
       'SELECT sender, message FROM chat_messages WHERE user_id = ? AND soulmate_id = ? ORDER BY created_at DESC LIMIT 10'
     ).bind(userId, soulmate.id).all()
 
     // 会話履歴を逆順にして時系列順に（絵文字を除去して文脈のみ学習）
-    const conversationHistory = chatHistory.results.reverse().map((msg: any) => {
-      // 絵文字を除去（U+1F300-U+1F9FFの範囲とその他の絵文字）
+    const conversationHistory = recentMessages.results.reverse().map((msg: any) => {
+      // 絵文字を除去
       const messageWithoutEmoji = msg.message.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}\u{1F100}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{FE00}-\u{FE0F}\u{203C}\u{2049}\u{20E3}\u{2139}\u{2194}-\u{2199}\u{21A9}-\u{21AA}\u{231A}-\u{231B}\u{2328}\u{23CF}\u{23E9}-\u{23F3}\u{23F8}-\u{23FA}\u{24C2}\u{25AA}-\u{25AB}\u{25B6}\u{25C0}\u{25FB}-\u{25FE}\u{2600}-\u{2604}\u{260E}\u{2611}\u{2614}-\u{2615}\u{2618}\u{261D}\u{2620}\u{2622}-\u{2623}\u{2626}\u{262A}\u{262E}-\u{262F}\u{2638}-\u{263A}\u{2640}\u{2642}\u{2648}-\u{2653}\u{265F}-\u{2660}\u{2663}\u{2665}-\u{2666}\u{2668}\u{267B}\u{267E}-\u{267F}\u{2692}-\u{2697}\u{2699}\u{269B}-\u{269C}\u{26A0}-\u{26A1}\u{26A7}\u{26AA}-\u{26AB}\u{26B0}-\u{26B1}\u{26BD}-\u{26BE}\u{26C4}-\u{26C5}\u{26C8}\u{26CE}-\u{26CF}\u{26D1}\u{26D3}-\u{26D4}\u{26E9}-\u{26EA}\u{26F0}-\u{26F5}\u{26F7}-\u{26FA}\u{26FD}\u{2702}\u{2705}\u{2708}-\u{270D}\u{270F}\u{2712}\u{2714}\u{2716}\u{271D}\u{2721}\u{2728}\u{2733}-\u{2734}\u{2744}\u{2747}\u{274C}\u{274E}\u{2753}-\u{2755}\u{2757}\u{2763}-\u{2764}\u{2795}-\u{2797}\u{27A1}\u{27B0}\u{27BF}\u{2934}-\u{2935}\u{2B05}-\u{2B07}\u{2B1B}-\u{2B1C}\u{2B50}\u{2B55}\u{3030}\u{303D}\u{3297}\u{3299}]/gu, '')
       return `${msg.sender === 'user' ? 'ユーザー' : name}: ${messageWithoutEmoji.trim()}`
     }).join('\n')
 
-    // Gemini APIでソウルメイトの返信を生成
+    // 日次サマリーのフォーマット
+    const dailySummariesText = dailySummaries.results.length > 0 
+      ? dailySummaries.results.map((s: any) => `${s.date}: ${s.summary}`).join('\n')
+      : '（まだ過去の会話サマリーはありません）'
+
+    // ユーザープロファイルのフォーマット
+    const userProfileText = userProfile 
+      ? `性格: ${userProfile.personality_summary || '不明'}\n趣味・関心: ${userProfile.interests || '不明'}\n会話スタイル: ${userProfile.conversation_style || '不明'}`
+      : '（まだユーザーのプロファイルは学習されていません）'
+
+    // Gemini APIでソウルメイトの返信を生成（長期・中期・短期記憶を統合）
     const systemPrompt = `あなたは「${name}」という名前の守護動物です。
 コンセプト: ${concept}
 性格: ${personality}
 口調: ${tone}
+
+【ユーザーについて覚えていること】
+${userProfileText}
+
+【過去30日間の会話の要約】
+${dailySummariesText}
+
+【今日の会話】
+${conversationHistory}
 
 以下のガイドラインに従って、ユーザーと対話してください：
 1. ${name}として、性格と口調を忠実に再現してください
@@ -888,9 +920,6 @@ app.post('/api/chat/send', async (c) => {
 4. 絵文字を適度に使用してください。毎回同じ絵文字ではなく、会話の内容や雰囲気に合わせて多様な絵文字を選んでください
 5. 返信は必ず質問で終わるか、相手の反応を促す形で終わってください
 6. 例外: ユーザーが「行ってきます」「おやすみ」「またね」「バイバイ」など、明確に会話を終わらせる挨拶をした場合のみ、「行ってらっしゃい」「おやすみ」「またね」などの締めの言葉で応答してください
-
-過去の会話履歴：
-${conversationHistory}
 
 現在のユーザーのメッセージ: ${message}
 
@@ -950,6 +979,29 @@ ${conversationHistory}
       await db.prepare(
         'UPDATE user_stats SET total_messages = total_messages + 2, last_updated_at = CURRENT_TIMESTAMP WHERE user_id = ?'
       ).bind(userId).run()
+    }
+
+    // 【メモリーシステム】10メッセージごとにパーソナリティ更新をバックグラウンド実行
+    const totalMessages = stats ? (stats.total_messages as number) : 2
+    if (totalMessages % 10 === 0) {
+      // 非同期でパーソナリティ更新（レスポンスを待たない）
+      updateUserPersonality(db, userId, soulmate.id, apiKey).catch(err => 
+        console.error('Failed to update personality:', err)
+      )
+    }
+
+    // 【メモリーシステム】日次サマリー生成（前日分がまだない場合）
+    const today = new Date().toISOString().split('T')[0]
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+    const yesterdaySummary = await db.prepare(
+      'SELECT id FROM daily_conversation_summary WHERE user_id = ? AND soulmate_id = ? AND date = ?'
+    ).bind(userId, soulmate.id, yesterday).first()
+
+    if (!yesterdaySummary) {
+      // 非同期で日次サマリー生成（レスポンスを待たない）
+      generateDailySummary(db, userId, soulmate.id, yesterday, apiKey).catch(err =>
+        console.error('Failed to generate daily summary:', err)
+      )
     }
 
     return c.json({
@@ -1549,5 +1601,208 @@ app.get('/api/admin/history', async (c) => {
     }, 500)
   }
 })
+
+// ========================================
+// メモリーシステム: ヘルパー関数
+// ========================================
+
+/**
+ * ユーザーのパーソナリティプロファイルを更新
+ * 最新100件の会話から学習
+ */
+async function updateUserPersonality(
+  db: D1Database, 
+  userId: string, 
+  soulmateId: number, 
+  apiKey: string
+) {
+  try {
+    // 最新100件の会話を取得
+    const messages = await db.prepare(
+      `SELECT sender, message FROM chat_messages 
+       WHERE user_id = ? AND soulmate_id = ? 
+       ORDER BY created_at DESC LIMIT 100`
+    ).bind(userId, soulmateId).all()
+
+    if (messages.results.length < 10) {
+      return // メッセージが少なすぎる場合はスキップ
+    }
+
+    // ユーザーのメッセージのみ抽出
+    const userMessages = messages.results
+      .filter((m: any) => m.sender === 'user')
+      .map((m: any) => m.message)
+      .join('\n')
+
+    // Gemini APIでパーソナリティ分析
+    const analysisPrompt = `以下のユーザーのメッセージから、ユーザーのパーソナリティを分析してください。
+
+ユーザーのメッセージ:
+${userMessages}
+
+以下の形式で簡潔に（各項目50文字以内）分析結果を出力してください：
+性格: [明るい、内向的、慎重など]
+趣味・関心: [映画鑑賞、読書、旅行など]
+会話スタイル: [丁寧、カジュアル、感情表現豊かなど]`
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: analysisPrompt }] }],
+          generationConfig: {
+            temperature: 0.5,
+            maxOutputTokens: 200
+          }
+        })
+      }
+    )
+
+    if (!response.ok) {
+      console.error('Personality analysis failed')
+      return
+    }
+
+    const data = await response.json()
+    const analysis = data.candidates?.[0]?.content?.parts?.[0]?.text
+
+    if (!analysis) {
+      return
+    }
+
+    // 分析結果をパース
+    const lines = analysis.split('\n')
+    let personalitySummary = ''
+    let interests = ''
+    let conversationStyle = ''
+
+    for (const line of lines) {
+      if (line.startsWith('性格:')) {
+        personalitySummary = line.replace('性格:', '').trim()
+      } else if (line.startsWith('趣味・関心:')) {
+        interests = line.replace('趣味・関心:', '').trim()
+      } else if (line.startsWith('会話スタイル:')) {
+        conversationStyle = line.replace('会話スタイル:', '').trim()
+      }
+    }
+
+    // DBに保存（UPSERT）
+    await db.prepare(
+      `INSERT INTO user_personality (user_id, soulmate_id, personality_summary, interests, conversation_style, updated_at)
+       VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+       ON CONFLICT(user_id, soulmate_id) DO UPDATE SET
+         personality_summary = excluded.personality_summary,
+         interests = excluded.interests,
+         conversation_style = excluded.conversation_style,
+         updated_at = CURRENT_TIMESTAMP`
+    ).bind(userId, soulmateId, personalitySummary, interests, conversationStyle).run()
+
+    console.log('Personality updated for user:', userId)
+  } catch (error) {
+    console.error('updateUserPersonality error:', error)
+  }
+}
+
+/**
+ * 日次会話サマリーを生成
+ */
+async function generateDailySummary(
+  db: D1Database,
+  userId: string,
+  soulmateId: number,
+  date: string,
+  apiKey: string
+) {
+  try {
+    // 指定日の会話を取得
+    const messages = await db.prepare(
+      `SELECT sender, message FROM chat_messages 
+       WHERE user_id = ? AND soulmate_id = ?
+       AND date(created_at) = ?
+       ORDER BY created_at ASC`
+    ).bind(userId, soulmateId, date).all()
+
+    if (messages.results.length === 0) {
+      return // その日の会話がない場合はスキップ
+    }
+
+    // 会話を整形
+    const conversation = messages.results
+      .map((m: any) => `${m.sender === 'user' ? 'ユーザー' : 'ソウルメイト'}: ${m.message}`)
+      .join('\n')
+
+    // Gemini APIでサマリー生成
+    const summaryPrompt = `以下の会話を要約してください。
+
+会話:
+${conversation}
+
+以下の形式で簡潔に（各項目50文字以内）出力してください：
+要約: [会話の要約]
+トピック: [主なトピック、カンマ区切り]
+感情: [ユーザーの感情]`
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: summaryPrompt }] }],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 200
+          }
+        })
+      }
+    )
+
+    if (!response.ok) {
+      console.error('Daily summary generation failed')
+      return
+    }
+
+    const data = await response.json()
+    const result = data.candidates?.[0]?.content?.parts?.[0]?.text
+
+    if (!result) {
+      return
+    }
+
+    // 結果をパース
+    const lines = result.split('\n')
+    let summary = ''
+    let topics = ''
+    let emotion = ''
+
+    for (const line of lines) {
+      if (line.startsWith('要約:')) {
+        summary = line.replace('要約:', '').trim()
+      } else if (line.startsWith('トピック:')) {
+        topics = line.replace('トピック:', '').trim()
+      } else if (line.startsWith('感情:')) {
+        emotion = line.replace('感情:', '').trim()
+      }
+    }
+
+    // DBに保存（UPSERT）
+    await db.prepare(
+      `INSERT INTO daily_conversation_summary 
+       (user_id, soulmate_id, date, summary, topics, emotion, message_count, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+       ON CONFLICT(user_id, soulmate_id, date) DO UPDATE SET
+         summary = excluded.summary,
+         topics = excluded.topics,
+         emotion = excluded.emotion,
+         message_count = excluded.message_count`
+    ).bind(userId, soulmateId, date, summary, topics, emotion, messages.results.length).run()
+
+    console.log('Daily summary generated for:', date)
+  } catch (error) {
+    console.error('generateDailySummary error:', error)
+  }
+}
 
 export default app
