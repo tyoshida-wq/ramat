@@ -393,6 +393,15 @@ body {
   }
 }
 
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
 /* ========================================
    レスポンシブ対応
    ======================================== */
@@ -480,6 +489,20 @@ body {
   box-shadow: var(--shadow-soft);
   backdrop-filter: blur(10px);
   animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-image-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.hero-image {
+  width: 280px;
+  height: 280px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 30px rgba(255, 107, 157, 0.3));
 }
 
 .hero-content {
@@ -648,6 +671,11 @@ body {
 
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
+  .hero-image {
+    width: 220px;
+    height: 220px;
+  }
+  
   .hero-title {
     font-size: 1.5rem;
   }
@@ -666,5 +694,12 @@ body {
   
   .cta-title {
     font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-image {
+    width: 180px;
+    height: 180px;
   }
 }

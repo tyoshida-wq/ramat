@@ -217,6 +217,9 @@ app.get('/', (c) => {
       <main class="main landing-main">
         {/* ヒーローセクション */}
         <section class="hero-section">
+          <div class="hero-image-wrapper">
+            <img src="/static/hero-cat.png" alt="可愛い守護動物" class="hero-image" />
+          </div>
           <div class="hero-content">
             <h2 class="hero-title">孤独な魂に寄り添う守護動物</h2>
             <p class="hero-description">
