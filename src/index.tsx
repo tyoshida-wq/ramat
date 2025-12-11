@@ -18,6 +18,7 @@ import {
 type Bindings = {
   GEMINI_API_KEY: string
   DB: D1Database
+  R2: R2Bucket
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -1417,6 +1418,146 @@ app.post('/api/mypage/stats', async (c) => {
       error: 'Failed to calculate statistics',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, 500)
+  }
+})
+
+// ========================================
+// 待ち受け画像生成API
+// ========================================
+
+// API: 待ち受け画像生成
+app.post('/api/wallpapers/generate', async (c) => {
+  try {
+    const db = c.env.DB
+    const userId = c.get('userId')
+    const { soulmateId } = await c.req.json()
+
+    console.log(`[Wallpaper Generation] User: ${userId}, Soulmate: ${soulmateId}`)
+
+    // ソウルメイト情報取得
+    const soulmate = await db.prepare(
+      'SELECT * FROM soulmates WHERE id = ? AND user_id = ?'
+    ).bind(soulmateId, userId).first()
+
+    if (!soulmate) {
+      return c.json({ error: 'Soulmate not found' }, 404)
+    }
+
+    // 既に生成済みかチェック
+    const existing = await db.prepare(
+      'SELECT * FROM soulmate_wallpapers WHERE soulmate_id = ?'
+    ).bind(soulmateId).first()
+
+    if (existing) {
+      return c.json({
+        success: true,
+        mobileUrl: existing.mobile_wallpaper_url,
+        pcUrl: existing.pc_wallpaper_url,
+        message: 'Wallpapers already exist'
+      })
+    }
+
+    // 参考画像（ソウルメイトの基本画像）
+    const referenceImage = soulmate.image_base64 as string
+
+    // プロンプト作成
+    const basePrompt = `名前: ${soulmate.name}
+コンセプト: ${soulmate.concept}
+動物: ${soulmate.animal}
+性格: ${soulmate.personality}`
+
+    // 動的インポート
+    const { generateWallpaper, uploadToR2 } = await import('./services/wallpaper')
+
+    console.log('[Wallpaper Generation] Generating mobile wallpaper...')
+    // スマホ待ち受け生成（9:16）
+    const mobileWallpaper = await generateWallpaper(
+      referenceImage,
+      basePrompt + '\n背景: 幻想的な朝焼けの空、桜の花びらが舞う風景',
+      '9:16',
+      c.env.GEMINI_API_KEY
+    )
+
+    console.log('[Wallpaper Generation] Generating PC wallpaper...')
+    // PC待ち受け生成（16:9）
+    const pcWallpaper = await generateWallpaper(
+      referenceImage,
+      basePrompt + '\n背景: 広大な星空、オーロラが輝く幻想的な夜の風景',
+      '16:9',
+      c.env.GEMINI_API_KEY
+    )
+
+    // R2にアップロード
+    console.log('[Wallpaper Generation] Uploading to R2...')
+    const mobileKey = `wallpapers/${soulmateId}/mobile_${Date.now()}.png`
+    const pcKey = `wallpapers/${soulmateId}/pc_${Date.now()}.png`
+
+    const mobileUrl = await uploadToR2(c.env.R2, mobileKey, mobileWallpaper)
+    const pcUrl = await uploadToR2(c.env.R2, pcKey, pcWallpaper)
+
+    // データベースに保存
+    console.log('[Wallpaper Generation] Saving to database...')
+    await db.prepare(`
+      INSERT INTO soulmate_wallpapers (soulmate_id, mobile_wallpaper_url, pc_wallpaper_url)
+      VALUES (?, ?, ?)
+    `).bind(soulmateId, mobileUrl, pcUrl).run()
+
+    console.log('[Wallpaper Generation] Success!')
+    return c.json({
+      success: true,
+      mobileUrl,
+      pcUrl
+    })
+
+  } catch (error) {
+    console.error('[Wallpaper Generation] Error:', error)
+    return c.json({
+      error: 'Failed to generate wallpapers',
+      details: error instanceof Error ? error.message : String(error)
+    }, 500)
+  }
+})
+
+// API: 待ち受け画像取得
+app.get('/api/wallpapers/:soulmateId', async (c) => {
+  try {
+    const db = c.env.DB
+    const userId = c.get('userId')
+    const soulmateId = c.req.param('soulmateId')
+
+    console.log(`[Wallpaper Get] User: ${userId}, Soulmate: ${soulmateId}`)
+
+    // 権限チェック
+    const soulmate = await db.prepare(
+      'SELECT * FROM soulmates WHERE id = ? AND user_id = ?'
+    ).bind(soulmateId, userId).first()
+
+    if (!soulmate) {
+      return c.json({ error: 'Unauthorized' }, 403)
+    }
+
+    // 待ち受け画像取得
+    const wallpapers = await db.prepare(
+      'SELECT * FROM soulmate_wallpapers WHERE soulmate_id = ? ORDER BY created_at DESC LIMIT 1'
+    ).bind(soulmateId).first()
+
+    if (!wallpapers) {
+      return c.json({
+        exists: false,
+        message: 'No wallpapers generated yet'
+      })
+    }
+
+    return c.json({
+      exists: true,
+      mobileUrl: wallpapers.mobile_wallpaper_url,
+      pcUrl: wallpapers.pc_wallpaper_url,
+      createdAt: wallpapers.created_at
+    })
+
+  } catch (error) {
+    console.error('[Wallpaper Get] Error:', error)
+    return c.json({ error: 'Failed to fetch wallpapers' }, 500)
   }
 })
 
