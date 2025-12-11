@@ -15,6 +15,7 @@ export const renderer = jsxRenderer(({ children }) => {
         <link href="/static/admin.css" rel="stylesheet" />
         <link href="/static/chat.css" rel="stylesheet" />
         <link href="/static/mypage.css" rel="stylesheet" />
+        <link href="/static/store.css" rel="stylesheet" />
         <link href="/static/login.css" rel="stylesheet" />
       </head>
       <body>{children}</body>

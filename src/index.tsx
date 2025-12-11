@@ -248,6 +248,10 @@ app.get('/', (c) => {
           <span class="nav-icon">💬</span>
           <span class="nav-label">チャット</span>
         </a>
+        <a href="/store" class="nav-item">
+          <span class="nav-icon">🛍️</span>
+          <span class="nav-label">ストア</span>
+        </a>
         <a href="/mypage" class="nav-item">
           <span class="nav-icon">👤</span>
           <span class="nav-label">マイページ</span>
@@ -321,6 +325,10 @@ app.get('/generate', (c) => {
         <a href="/chat" class="nav-item">
           <span class="nav-icon">💬</span>
           <span class="nav-label">チャット</span>
+        </a>
+        <a href="/store" class="nav-item">
+          <span class="nav-icon">🛍️</span>
+          <span class="nav-label">ストア</span>
         </a>
         <a href="/mypage" class="nav-item">
           <span class="nav-icon">👤</span>
@@ -534,6 +542,202 @@ app.get('/mypage', (c) => {
       </nav>
 
       <script src="/static/mypage.js"></script>
+    </div>
+  )
+})
+
+// ストアページ
+app.get('/store', (c) => {
+  return c.render(
+    <div class="store-container">
+      <header class="store-header">
+        <h1 class="store-title">🛍️ ソウルメイトストア</h1>
+        <p class="store-subtitle">あなたのソウルメイトをグッズに</p>
+      </header>
+
+      <main class="store-main">
+        {/* 商品カテゴリー */}
+        <section class="category-section">
+          <div class="category-tabs">
+            <button class="category-tab active" data-category="all">すべて</button>
+            <button class="category-tab" data-category="wallpaper">待ち受け</button>
+            <button class="category-tab" data-category="goods">グッズ</button>
+          </div>
+        </section>
+
+        {/* 商品グリッド */}
+        <section class="products-section">
+          <div class="products-grid" id="productsGrid">
+            {/* スマホ待ち受け */}
+            <div class="product-card" data-category="wallpaper">
+              <div class="product-image">
+                <img src="https://via.placeholder.com/300x600/FFB7C5/FFFFFF?text=📱" alt="スマホ待ち受け" />
+                <span class="product-badge">デジタル</span>
+              </div>
+              <div class="product-info">
+                <h3 class="product-name">スマホ待ち受け画像</h3>
+                <p class="product-desc">あなたのソウルメイトがいつも一緒に</p>
+                <div class="product-specs">
+                  <span class="spec-item">📐 1080x2340px</span>
+                  <span class="spec-item">🎨 高画質PNG</span>
+                </div>
+                <div class="product-footer">
+                  <span class="product-price">¥500</span>
+                  <button class="product-btn" onclick="purchaseItem('wallpaper_mobile', 500)">
+                    <span>購入する</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* PC待ち受け */}
+            <div class="product-card" data-category="wallpaper">
+              <div class="product-image">
+                <img src="https://via.placeholder.com/300x200/FFB7C5/FFFFFF?text=💻" alt="PC待ち受け" />
+                <span class="product-badge">デジタル</span>
+              </div>
+              <div class="product-info">
+                <h3 class="product-name">PC待ち受け画像</h3>
+                <p class="product-desc">デスクトップを癒しの空間に</p>
+                <div class="product-specs">
+                  <span class="spec-item">📐 1920x1080px</span>
+                  <span class="spec-item">🎨 高画質PNG</span>
+                </div>
+                <div class="product-footer">
+                  <span class="product-price">¥500</span>
+                  <button class="product-btn" onclick="purchaseItem('wallpaper_pc', 500)">
+                    <span>購入する</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 待ち受けセット */}
+            <div class="product-card featured" data-category="wallpaper">
+              <div class="product-image">
+                <img src="https://via.placeholder.com/300x300/FFB7C5/FFFFFF?text=📱💻" alt="待ち受けセット" />
+                <span class="product-badge hot">お得セット</span>
+              </div>
+              <div class="product-info">
+                <h3 class="product-name">待ち受けセット</h3>
+                <p class="product-desc">スマホ＋PC両方セットでお得！</p>
+                <div class="product-specs">
+                  <span class="spec-item">📱 スマホ用</span>
+                  <span class="spec-item">💻 PC用</span>
+                </div>
+                <div class="product-footer">
+                  <span class="product-price original">¥1,000</span>
+                  <span class="product-price">¥800</span>
+                  <button class="product-btn primary" onclick="purchaseItem('wallpaper_set', 800)">
+                    <span>購入する</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* アクリルキーホルダー */}
+            <div class="product-card" data-category="goods">
+              <div class="product-image">
+                <img src="https://via.placeholder.com/300x300/FFB7C5/FFFFFF?text=🔑" alt="キーホルダー" />
+                <span class="product-badge">配送</span>
+              </div>
+              <div class="product-info">
+                <h3 class="product-name">アクリルキーホルダー</h3>
+                <p class="product-desc">いつでも持ち歩けるソウルメイト</p>
+                <div class="product-specs">
+                  <span class="spec-item">📏 5cm角</span>
+                  <span class="spec-item">🎨 両面印刷</span>
+                </div>
+                <div class="product-footer">
+                  <span class="product-price">¥1,200</span>
+                  <button class="product-btn" onclick="purchaseItem('keychain', 1200)">
+                    <span>購入する</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* アクリルスタンド */}
+            <div class="product-card" data-category="goods">
+              <div class="product-image">
+                <img src="https://via.placeholder.com/300x400/FFB7C5/FFFFFF?text=🎭" alt="アクスタ" />
+                <span class="product-badge">配送</span>
+              </div>
+              <div class="product-info">
+                <h3 class="product-name">アクリルスタンド</h3>
+                <p class="product-desc">デスクに飾れる癒しの相棒</p>
+                <div class="product-specs">
+                  <span class="spec-item">📏 10cm高</span>
+                  <span class="spec-item">🎨 台座付き</span>
+                </div>
+                <div class="product-footer">
+                  <span class="product-price">¥1,800</span>
+                  <button class="product-btn" onclick="purchaseItem('acrylic_stand', 1800)">
+                    <span>購入する</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* マグカップ */}
+            <div class="product-card" data-category="goods">
+              <div class="product-image">
+                <img src="https://via.placeholder.com/300x300/FFB7C5/FFFFFF?text=☕" alt="マグカップ" />
+                <span class="product-badge">配送</span>
+              </div>
+              <div class="product-info">
+                <h3 class="product-name">マグカップ</h3>
+                <p class="product-desc">毎日のコーヒータイムに</p>
+                <div class="product-specs">
+                  <span class="spec-item">☕ 300ml</span>
+                  <span class="spec-item">🎨 全面印刷</span>
+                </div>
+                <div class="product-footer">
+                  <span class="product-price">¥1,500</span>
+                  <button class="product-btn" onclick="purchaseItem('mug', 1500)">
+                    <span>購入する</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 注意事項 */}
+        <section class="notice-section">
+          <h3 class="notice-title">📝 ご注意事項</h3>
+          <ul class="notice-list">
+            <li>デジタル商品は購入後すぐにダウンロードできます</li>
+            <li>物理グッズは製作・配送に1〜2週間かかります</li>
+            <li>返品・交換は不良品の場合のみ対応いたします</li>
+            <li>ソウルメイトの画像は自動的に反映されます</li>
+          </ul>
+        </section>
+      </main>
+
+      {/* ナビゲーション */}
+      <nav class="bottom-nav">
+        <a href="/" class="nav-item">
+          <span class="nav-icon">⌂</span>
+          <span class="nav-label">ホーム</span>
+        </a>
+        <a href="/generate" class="nav-item">
+          <span class="nav-icon">◈</span>
+          <span class="nav-label">生成</span>
+        </a>
+        <a href="/chat" class="nav-item">
+          <span class="nav-icon">💬</span>
+          <span class="nav-label">チャット</span>
+        </a>
+        <a href="/store" class="nav-item active">
+          <span class="nav-icon">🛍️</span>
+          <span class="nav-label">ストア</span>
+        </a>
+        <a href="/mypage" class="nav-item">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">マイページ</span>
+        </a>
+      </nav>
     </div>
   )
 })
