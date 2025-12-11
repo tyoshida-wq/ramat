@@ -233,43 +233,6 @@ app.get('/', (c) => {
             </a>
           </div>
         </section>
-
-        {/* 特徴セクション */}
-        <section class="features-section">
-          <h2 class="section-heading">Ramatの特徴</h2>
-          <div class="features-grid">
-            <div class="feature-card">
-              <div class="feature-icon">🎨</div>
-              <h3 class="feature-title">AI生成アート</h3>
-              <p class="feature-desc">Gemini AIが生み出す、世界に一つだけのKawaiiイラスト</p>
-            </div>
-            <div class="feature-card">
-              <div class="feature-icon">💭</div>
-              <h3 class="feature-title">個性的なプロフィール</h3>
-              <p class="feature-desc">性格、口調、コンセプトまで細かく設定された唯一無二のキャラクター</p>
-            </div>
-            <div class="feature-card">
-              <div class="feature-icon">🌸</div>
-              <h3 class="feature-title">癒しのデザイン</h3>
-              <p class="feature-desc">パステルカラーの桜色グラデーションで心を包む優しいUI</p>
-            </div>
-            <div class="feature-card">
-              <div class="feature-icon">🦊</div>
-              <h3 class="feature-title">多様な動物</h3>
-              <p class="feature-desc">哺乳類55種 + 幻想的生物20種から運命の出会い</p>
-            </div>
-          </div>
-        </section>
-
-        {/* CTAセクション */}
-        <section class="cta-section">
-          <h2 class="cta-title">あなたのソウルメイトに会いに行こう</h2>
-          <p class="cta-description">たった一度のクリックで、運命の守護動物があなたのもとに</p>
-          <a href="/generate" class="cta-btn">
-            <span class="btn-icon">🌸</span>
-            <span class="btn-text">ソウルメイトを呼ぶ</span>
-          </a>
-        </section>
       </main>
 
       <nav class="bottom-nav">
