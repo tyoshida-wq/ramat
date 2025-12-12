@@ -36,9 +36,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       `
       footer.style.display = 'block'
 
-      // 3秒後にホームページへリダイレクト
+      // 3秒後にチャットページへリダイレクト（初回訪問時は生成モーダルが表示される）
       setTimeout(() => {
-        window.location.href = '/'
+        window.location.href = '/chat'
       }, 3000)
     } else {
       // エラー

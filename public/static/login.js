@@ -76,8 +76,8 @@ loginForm.addEventListener('submit', async (e) => {
       // ユーザーIDをLocalStorageに保存（互換性維持）
       localStorage.setItem('ramat_user_id', data.user.id);
       
-      // ホームページにリダイレクト
-      window.location.href = '/';
+      // チャットページにリダイレクト（初回訪問時は生成モーダルが表示される）
+      window.location.href = '/chat';
     } else {
       // エラー表示
       showError(loginError, data.error || 'ログインに失敗しました');
@@ -175,7 +175,7 @@ registerForm.addEventListener('submit', async (e) => {
       } else {
         // 従来の動作（メール認証なし）
         localStorage.setItem('ramat_user_id', data.user.id);
-        window.location.href = '/';
+        window.location.href = '/chat';
       }
     } else {
       // エラー表示

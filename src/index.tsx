@@ -2730,8 +2730,8 @@ app.get('/auth/google/callback', async (c) => {
 
     console.log('Google OAuth login successful for:', user.email)
 
-    // ホームページにリダイレクト
-    return c.redirect('/')
+    // チャットページにリダイレクト（初回訪問時は生成モーダルが表示される）
+    return c.redirect('/chat')
 
   } catch (error) {
     console.error('Google OAuth callback error:', error)
