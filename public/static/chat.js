@@ -465,6 +465,8 @@ async function initializeChatPage() {
     showGenerationModal();
   } else {
     console.log('✅ ソウルメイト存在確認済み: 通常チャット画面を表示します');
+    // ソウルメイト情報を読み込む
+    await loadSoulmateInfo();
     // 既存のウェルカムメッセージをカスタマイズ
     customizeWelcomeMessage();
   }
@@ -528,9 +530,6 @@ function updateSoulmateUI(profile) {
     avatarElement.src = profile.image;
   }
 }
-
-// ページ読み込み時にソウルメイト情報を読み込む
-loadSoulmateInfo();
 
 // ウェルカムメッセージのカスタマイズ（ソウルメイトの性格に基づく、将来の実装用）
 function customizeWelcomeMessage() {
