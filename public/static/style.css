@@ -316,11 +316,36 @@ body {
 }
 
 .nav-icon {
-  font-size: 1.4rem;
+  width: 48px;
+  height: 48px;
   margin-bottom: 2px;
   transition: transform 0.3s ease;
-  font-weight: 400;
-  line-height: 1;
+  background-image: url('/static/nav-icons.png');
+  background-size: 200% 200%;
+  background-repeat: no-repeat;
+  display: block;
+}
+
+/* ホームアイコン (左上) */
+.nav-item[href="/"] .nav-icon,
+.nav-item[href="/#"] .nav-icon {
+  background-position: 0% 0%;
+}
+
+/* チャットアイコン (右上) */
+.nav-item[href="/chat"] .nav-icon {
+  background-position: 100% 0%;
+}
+
+/* ストアアイコン (左下) */
+.nav-item[href="/store"] .nav-icon {
+  background-position: 0% 100%;
+}
+
+/* マイページ/管理者アイコン (右下) */
+.nav-item[href="/mypage"] .nav-icon,
+.nav-item[href="/admin"] .nav-icon {
+  background-position: 100% 100%;
 }
 
 .nav-item:hover .nav-icon {

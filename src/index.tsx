@@ -447,24 +447,24 @@ app.get('/chat', (c) => {
       {/* 下部ナビゲーション */}
       <nav class="bottom-nav">
         <a href="/" class="nav-item">
-          <span class="nav-icon">⌂</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">ホーム</span>
         </a>
 
         <a href="/chat" class="nav-item active">
-          <span class="nav-icon">💬</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">チャット</span>
         </a>
         <a href="/store" class="nav-item">
-          <span class="nav-icon">🛍️</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">ストア</span>
         </a>
         <a href="/mypage" class="nav-item">
-          <span class="nav-icon">👤</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item">
-          <span class="nav-icon">✱</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">管理者</span>
         </a>
       </nav>
@@ -569,20 +569,20 @@ app.get('/mypage', (c) => {
       {/* 下部ナビゲーション */}
       <nav class="bottom-nav">
         <a href="/" class="nav-item">
-          <span class="nav-icon">⌂</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">ホーム</span>
         </a>
 
         <a href="/chat" class="nav-item">
-          <span class="nav-icon">💬</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">チャット</span>
         </a>
         <a href="/mypage" class="nav-item active">
-          <span class="nav-icon">👤</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item">
-          <span class="nav-icon">✱</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">管理者</span>
         </a>
       </nav>
@@ -845,20 +845,20 @@ app.get('/store', async (c) => {
       {/* ナビゲーション */}
       <nav class="bottom-nav">
         <a href="/" class="nav-item">
-          <span class="nav-icon">⌂</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">ホーム</span>
         </a>
 
         <a href="/chat" class="nav-item">
-          <span class="nav-icon">💬</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">チャット</span>
         </a>
         <a href="/store" class="nav-item active">
-          <span class="nav-icon">🛍️</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">ストア</span>
         </a>
         <a href="/mypage" class="nav-item">
-          <span class="nav-icon">👤</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">マイページ</span>
         </a>
       </nav>
@@ -1035,20 +1035,20 @@ app.get('/admin', (c) => {
 
       <nav class="bottom-nav">
         <a href="/" class="nav-item">
-          <span class="nav-icon">⌂</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">ホーム</span>
         </a>
 
         <a href="/chat" class="nav-item">
-          <span class="nav-icon">💬</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">チャット</span>
         </a>
         <a href="/mypage" class="nav-item">
-          <span class="nav-icon">👤</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item active">
-          <span class="nav-icon">✱</span>
+          <span class="nav-icon"></span>
           <span class="nav-label">管理者</span>
         </a>
       </nav>
