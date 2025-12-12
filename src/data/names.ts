@@ -65,48 +65,40 @@ export const names = [
   "Paul", "Rose", "Ethan", "Anna", "Gabin", "Lina", "Eden", "Mila", "Pierre", "Clara",
   "Victor", "Léonie", "Antoine", "Nina", "Sacha", "Julia", "Alexandre", "Charlotte", "Mathis", "Marie",
   
-  // イタリア語圏の名前（50種類）
+  // イタリア語圏の名前（46種類）
   "Leonardo", "Sofia", "Francesco", "Giulia", "Alessandro", "Aurora", "Lorenzo", "Alice", "Mattia", "Ginevra",
   "Tommaso", "Emma", "Gabriele", "Giorgia", "Andrea", "Greta", "Riccardo", "Beatrice", "Edoardo", "Anna",
   "Matteo", "Vittoria", "Giuseppe", "Matilde", "Nicolò", "Chiara", "Antonio", "Martina", "Federico", "Sofia",
   "Diego", "Francesca", "Giovanni", "Arianna", "Marco", "Sara", "Davide", "Alessia", "Pietro", "Elena",
-  "Simone", "Camilla", "Luca", "Nicole", "Filippo", "Elisa", "Samuele", "Bianca", "Giacomo", "Viola",
+  "Simone", "Camilla", "Luca", "Nicole", "Filippo", "Elisa",
   
-  // スペイン語圏の名前（50種類）
+  // スペイン語圏の名前（40種類）
   "Santiago", "Sofía", "Mateo", "Valentina", "Sebastián", "Isabella", "Matías", "Camila", "Nicolás", "Valeria",
   "Alejandro", "Luciana", "Diego", "Ximena", "Samuel", "Emma", "Benjamín", "Martina", "Daniel", "María",
   "Lucas", "Catalina", "Gabriel", "Elena", "Pablo", "Victoria", "Álvaro", "Gabriela", "Adrián", "Daniela",
   "Manuel", "Emilia", "Tomás", "Paula", "Joaquín", "Sara", "Carlos", "Julia", "Antonio", "Amanda",
-  "Javier", "Natalia", "Fernando", "Adriana", "Miguel", "Mariana", "Eduardo", "Carmen", "Rafael", "Laura",
   
-  // ドイツ語圏の名前（50種類）
+  // ドイツ語圏の名前（30種類）
   "Noah", "Emma", "Ben", "Mia", "Paul", "Hannah", "Leon", "Sophia", "Finn", "Emilia",
   "Elias", "Lina", "Jonas", "Marie", "Luis", "Anna", "Felix", "Lea", "Maximilian", "Leonie",
   "Henry", "Amelie", "Alexander", "Lisa", "Theo", "Clara", "Jakob", "Laura", "David", "Charlotte",
-  "Anton", "Mila", "Moritz", "Luisa", "Emil", "Emily", "Oskar", "Johanna", "Friedrich", "Sophie",
-  "Carl", "Helena", "Julius", "Ida", "Leonard", "Ella", "Gabriel", "Nora", "Max", "Paula",
   
-  // 北欧の名前（50種類）
+  // 北欧の名前（30種類）
   "William", "Alice", "Lucas", "Elsa", "Oliver", "Maja", "Elias", "Ella", "Oscar", "Wilma",
   "Hugo", "Ebba", "Liam", "Olivia", "Alexander", "Astrid", "Viktor", "Alma", "Emil", "Saga",
   "Filip", "Freja", "Anton", "Alva", "Leo", "Vera", "Axel", "Stella", "Isak", "Lily",
-  "Charlie", "Elin", "Ludvig", "Nova", "Gustav", "Signe", "Theo", "Maja", "Vincent", "Iris",
-  "Nils", "Luna", "Erik", "Julia", "Felix", "Agnes", "Albin", "Emma", "Viggo", "Elsa",
   
-  // ギリシャ語圏の名前（30種類）
+  // ギリシャ語圏の名前（20種類）
   "Andreas", "Maria", "Georgios", "Eleni", "Dimitrios", "Sofia", "Konstantinos", "Katerina", "Nikolaos", "Ioanna",
   "Ioannis", "Christina", "Panagiotis", "Anna", "Christos", "Dimitra", "Vasileios", "Aikaterini", "Alexandros", "Vasiliki",
-  "Theodoros", "Styliani", "Michail", "Angeliki", "Spyridon", "Kyriaki", "Athanasios", "Paraskevi", "Stavros", "Georgia",
   
-  // ロシア語圏の名前（30種類）
+  // ロシア語圏の名前（20種類）
   "Alexander", "Anastasia", "Maxim", "Maria", "Ivan", "Anna", "Dmitry", "Elena", "Andrey", "Olga",
   "Mikhail", "Ekaterina", "Sergey", "Natalia", "Alexey", "Irina", "Vladimir", "Svetlana", "Nikolay", "Tatiana",
-  "Pavel", "Yulia", "Roman", "Victoria", "Denis", "Oksana", "Artem", "Daria", "Igor", "Alina",
   
-  // アラビア語圏の名前（30種類）
+  // アラビア語圏の名前（20種類）
   "Mohammed", "Fatima", "Ahmed", "Aisha", "Ali", "Maryam", "Omar", "Zahra", "Hassan", "Amira",
   "Ibrahim", "Layla", "Youssef", "Nour", "Abdullah", "Sara", "Khalid", "Hana", "Salem", "Yasmin",
-  "Mahmoud", "Zainab", "Karim", "Leila", "Tariq", "Aaliyah", "Faisal", "Malak", "Rashid", "Jana",
   
   // 韓国語圏の名前（20種類）
   "Minho", "Jiwoo", "Seo-jun", "Seo-yeon", "Yejun", "Minseol", "Doyun", "Jia", "Eunwoo", "Suyeon",
@@ -114,9 +106,5 @@ export const names = [
   
   // 中国語圏の名前（20種類）
   "Wei", "Yan", "Jun", "Na", "Tao", "Li", "Hao", "Ying", "Jie", "Fang",
-  "Ming", "Hong", "Lei", "Xiu", "Bo", "Mei", "Qiang", "Jing", "Yong", "Xia",
-  
-  // インド語圏の名前（20種類）
-  "Arjun", "Ananya", "Aditya", "Diya", "Aryan", "Aadhya", "Ayaan", "Priya", "Vihaan", "Saanvi",
-  "Krishna", "Kavya", "Advait", "Anika", "Sai", "Ishaan", "Riya", "Reyansh", "Aanya", "Vivaan"
+  "Ming", "Hong", "Lei", "Xiu", "Bo", "Mei", "Qiang", "Jing", "Yong", "Xia"
 ];
