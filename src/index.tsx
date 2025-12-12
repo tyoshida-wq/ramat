@@ -516,28 +516,6 @@ app.get('/mypage', (c) => {
           </div>
         </section>
 
-        {/* 統計情報 */}
-        <section class="stats-section">
-          <h2 class="section-title">📊 統計情報</h2>
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon">💬</div>
-              <div class="stat-value" id="statMessages">0</div>
-              <div class="stat-label">会話数</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">❤️</div>
-              <div class="stat-value" id="statFavorites">0</div>
-              <div class="stat-label">お気に入り</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">📅</div>
-              <div class="stat-value" id="statDays">1</div>
-              <div class="stat-label">日</div>
-            </div>
-          </div>
-        </section>
-
         {/* 設定メニュー */}
         <section class="settings-section">
           <h2 class="section-title">🔧 設定</h2>

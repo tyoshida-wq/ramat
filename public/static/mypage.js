@@ -126,29 +126,12 @@ async function loadStatistics() {
 
 // 統計UIを更新する関数
 function updateStatsUI(stats) {
-  // 会話数
-  const statMessages = document.getElementById('statMessages');
-  if (statMessages) {
-    statMessages.textContent = stats.totalMessages || 0;
-  }
-  
-  // お気に入り数
-  const statFavorites = document.getElementById('statFavorites');
-  if (statFavorites) {
-    statFavorites.textContent = stats.favoriteCount || 0;
-  }
-  
   // 出会った日数
   const daysCount = document.getElementById('daysCount');
-  const statDays = document.getElementById('statDays');
   const daysSince = stats.daysSince || 1;
   
   if (daysCount) {
     daysCount.textContent = daysSince;
-  }
-  
-  if (statDays) {
-    statDays.textContent = daysSince;
   }
   
   console.log(`📊 統計: ${stats.totalMessages || 0}件の会話, ${daysSince}日`);
