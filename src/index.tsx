@@ -450,10 +450,7 @@ app.get('/chat', (c) => {
           <span class="nav-icon">⌂</span>
           <span class="nav-label">ホーム</span>
         </a>
-        <a href="/generate" class="nav-item">
-          <span class="nav-icon">◈</span>
-          <span class="nav-label">生成</span>
-        </a>
+
         <a href="/chat" class="nav-item active">
           <span class="nav-icon">💬</span>
           <span class="nav-label">チャット</span>
@@ -575,10 +572,7 @@ app.get('/mypage', (c) => {
           <span class="nav-icon">⌂</span>
           <span class="nav-label">ホーム</span>
         </a>
-        <a href="/generate" class="nav-item">
-          <span class="nav-icon">◈</span>
-          <span class="nav-label">生成</span>
-        </a>
+
         <a href="/chat" class="nav-item">
           <span class="nav-icon">💬</span>
           <span class="nav-label">チャット</span>
@@ -825,10 +819,7 @@ app.get('/store', async (c) => {
           <span class="nav-icon">⌂</span>
           <span class="nav-label">ホーム</span>
         </a>
-        <a href="/generate" class="nav-item">
-          <span class="nav-icon">◈</span>
-          <span class="nav-label">生成</span>
-        </a>
+
         <a href="/chat" class="nav-item">
           <span class="nav-icon">💬</span>
           <span class="nav-label">チャット</span>
@@ -1048,10 +1039,7 @@ app.get('/admin', (c) => {
           <span class="nav-icon">⌂</span>
           <span class="nav-label">ホーム</span>
         </a>
-        <a href="/generate" class="nav-item">
-          <span class="nav-icon">◈</span>
-          <span class="nav-label">生成</span>
-        </a>
+
         <a href="/chat" class="nav-item">
           <span class="nav-icon">💬</span>
           <span class="nav-label">チャット</span>
@@ -1660,7 +1648,6 @@ app.get('/privacy', (c) => {
       
       <nav class="bottom-nav">
         <a href="/" class="nav-item"><i class="fas fa-home"></i><span>ホーム</span></a>
-        <a href="/generate" class="nav-item"><i class="fas fa-star"></i><span>生成</span></a>
         <a href="/chat" class="nav-item"><i class="fas fa-comment"></i><span>チャット</span></a>
         <a href="/mypage" class="nav-item"><i class="fas fa-user"></i><span>マイページ</span></a>
       </nav>
@@ -1715,7 +1702,6 @@ app.get('/terms', (c) => {
       
       <nav class="bottom-nav">
         <a href="/" class="nav-item"><i class="fas fa-home"></i><span>ホーム</span></a>
-        <a href="/generate" class="nav-item"><i class="fas fa-star"></i><span>生成</span></a>
         <a href="/chat" class="nav-item"><i class="fas fa-comment"></i><span>チャット</span></a>
         <a href="/mypage" class="nav-item"><i class="fas fa-user"></i><span>マイページ</span></a>
       </nav>
@@ -1786,7 +1772,6 @@ app.get('/legal', (c) => {
       
       <nav class="bottom-nav">
         <a href="/" class="nav-item"><i class="fas fa-home"></i><span>ホーム</span></a>
-        <a href="/generate" class="nav-item"><i class="fas fa-star"></i><span>生成</span></a>
         <a href="/chat" class="nav-item"><i class="fas fa-comment"></i><span>チャット</span></a>
         <a href="/mypage" class="nav-item"><i class="fas fa-user"></i><span>マイページ</span></a>
       </nav>
@@ -1863,7 +1848,6 @@ app.get('/contact', (c) => {
       
       <nav class="bottom-nav">
         <a href="/" class="nav-item"><i class="fas fa-home"></i><span>ホーム</span></a>
-        <a href="/generate" class="nav-item"><i class="fas fa-star"></i><span>生成</span></a>
         <a href="/chat" class="nav-item"><i class="fas fa-comment"></i><span>チャット</span></a>
         <a href="/mypage" class="nav-item"><i class="fas fa-user"></i><span>マイページ</span></a>
       </nav>
