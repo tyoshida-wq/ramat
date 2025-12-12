@@ -3,7 +3,9 @@
 // 統計データの読み込みとアニメーション
 async function loadStats() {
   try {
-    const response = await fetch('/api/admin/stats');
+    const response = await fetch('/api/admin/stats', {
+      credentials: 'include'
+    });
     const data = await response.json();
     
     // カウントアップアニメーション
@@ -129,7 +131,9 @@ function drawWeeklyChart(weeklyData) {
 // 履歴データの読み込み（実API接続版）
 async function loadHistory() {
   try {
-    const response = await fetch('/api/admin/history');
+    const response = await fetch('/api/admin/history', {
+      credentials: 'include'
+    });
     
     if (!response.ok) {
       throw new Error('Failed to fetch history');
