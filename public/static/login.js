@@ -73,6 +73,10 @@ loginForm.addEventListener('submit', async (e) => {
       // ログイン成功
       console.log('ログイン成功:', data.user);
       
+      // 古いユーザーデータをクリア（他のユーザーのデータが残っている可能性があるため）
+      localStorage.removeItem('soulmateProfile');
+      localStorage.removeItem('chatHistory');
+      
       // ユーザーIDをLocalStorageに保存（互換性維持）
       localStorage.setItem('ramat_user_id', data.user.id);
       
@@ -174,6 +178,10 @@ registerForm.addEventListener('submit', async (e) => {
         }, 5000);
       } else {
         // 従来の動作（メール認証なし）
+        // 古いユーザーデータをクリア
+        localStorage.removeItem('soulmateProfile');
+        localStorage.removeItem('chatHistory');
+        
         localStorage.setItem('ramat_user_id', data.user.id);
         window.location.href = '/chat';
       }

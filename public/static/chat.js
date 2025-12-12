@@ -119,13 +119,38 @@ function generateSoulmateReply(userMessage) {
   return replies[Math.floor(Math.random() * replies.length)];
 }
 
-// ユーザーIDを生成または取得する関数
-function getUserId() {
+// ユーザーIDを取得する関数（JWT認証から取得）
+async function getUserId() {
+  // まずLocalStorageをチェック（キャッシュ）
   let userId = localStorage.getItem('ramat_user_id');
-  if (!userId) {
-    userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
-    localStorage.setItem('ramat_user_id', userId);
+  
+  // APIから現在の認証ユーザーIDを取得
+  try {
+    const response = await fetch('/api/auth/me', {
+      credentials: 'include'
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.user && data.user.id) {
+        userId = data.user.id;
+        // LocalStorageを更新
+        localStorage.setItem('ramat_user_id', userId);
+        return userId;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to get user ID from API:', error);
   }
+  
+  // フォールバック: LocalStorageの値を使用
+  if (userId) {
+    return userId;
+  }
+  
+  // 最終フォールバック: 一時IDを生成（通常は発生しない）
+  userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+  localStorage.setItem('ramat_user_id', userId);
   return userId;
 }
 
@@ -151,7 +176,7 @@ async function sendMessage() {
   
   try {
     // 実APIにリクエスト送信
-    const userId = getUserId();
+    const userId = await getUserId();
     const response = await fetch('/api/chat/send', {
       method: 'POST',
       headers: {
@@ -242,19 +267,10 @@ scrollToBottom();
 // ソウルメイトが存在するかチェックする関数
 async function checkSoulmateExists() {
   try {
-    const userId = getUserId();
+    const userId = await getUserId();
     
-    // まずLocalStorageをチェック（高速）
-    const savedProfile = localStorage.getItem('soulmateProfile');
-    if (savedProfile) {
-      const profile = JSON.parse(savedProfile);
-      if (profile.id || profile.name) {
-        console.log('✅ LocalStorageにソウルメイトが存在します');
-        return true;
-      }
-    }
-    
-    // APIでも確認
+    // IMPORTANT: LocalStorageは他ユーザーのデータが残っている可能性があるため、APIを優先
+    // APIで確認
     const response = await fetch(`/api/mypage/profile/${userId}`, {
       credentials: 'include'
     });
@@ -347,7 +363,7 @@ async function startGeneration() {
     }, 800);
     
     // API呼び出し: ソウルメイト生成
-    const userId = getUserId();
+    const userId = await getUserId();
     const response = await fetch('/api/generate', {
       method: 'POST',
       headers: {
@@ -464,7 +480,7 @@ initializeChatPage();
 // ソウルメイトの情報を読み込む（API + LocalStorage併用）
 async function loadSoulmateInfo() {
   try {
-    const userId = getUserId();
+    const userId = await getUserId();
     
     // まずLocalStorageから読み込み（即座に表示）
     const savedProfile = localStorage.getItem('soulmateProfile');
