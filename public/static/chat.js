@@ -392,33 +392,34 @@ async function startGeneration() {
     stepGenerating.style.display = 'none';
     stepComplete.style.display = 'block';
     
+    // APIレスポンスからプロフィール取得
+    const profile = data.profile || data;
+    
     // 結果を表示
-    if (data.image_base64) {
-      resultImage.src = `data:image/png;base64,${data.image_base64}`;
-    } else if (data.image) {
-      resultImage.src = data.image;
+    if (profile.image) {
+      resultImage.src = profile.image;
     }
     
-    resultName.textContent = data.name || 'ソウルメイト';
-    resultConcept.textContent = data.concept || '';
-    resultGreeting.textContent = data.greeting || 'こんにちは！あなたに会えて嬉しいです✨';
+    resultName.textContent = profile.name || 'ソウルメイト';
+    resultConcept.textContent = profile.concept || '';
+    resultGreeting.textContent = profile.greeting || 'こんにちは！あなたに会えて嬉しいです✨';
     
     // 性格情報を表示
-    if (data.personality) {
-      resultPersonality.textContent = `性格: ${data.personality}`;
-    } else if (data.tone) {
-      resultPersonality.textContent = `口調: ${data.tone}`;
+    if (profile.personality) {
+      resultPersonality.textContent = `性格: ${profile.personality}`;
+    } else if (profile.tone) {
+      resultPersonality.textContent = `口調: ${profile.tone}`;
     }
     
     // プロフィールをLocalStorageに保存
     const profileData = {
-      id: data.id || Date.now(),
-      name: data.name,
-      concept: data.concept,
-      personality: data.personality,
-      tone: data.tone,
-      greeting: data.greeting,
-      image: data.image_base64 ? `data:image/png;base64,${data.image_base64}` : data.image
+      id: profile.id || Date.now(),
+      name: profile.name,
+      concept: profile.concept,
+      personality: profile.personality,
+      tone: profile.tone,
+      greeting: profile.greeting,
+      image: profile.image
     };
     localStorage.setItem('soulmateProfile', JSON.stringify(profileData));
     
