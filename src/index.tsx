@@ -251,7 +251,7 @@ app.get('/', (c) => {
         <h1 class="landing-logo">Ramat 🌸</h1>
         <div class="landing-nav">
           <a href="/login" class="landing-nav-link">ログイン</a>
-          <a href="/generate" class="landing-nav-btn">始める</a>
+          <a href="/chat" class="landing-nav-btn">始める</a>
         </div>
       </header>
 
@@ -271,7 +271,7 @@ app.get('/', (c) => {
               あなただけの特別な存在
             </p>
             <div class="landing-hero-buttons">
-              <a href="/generate" class="landing-primary-btn">
+              <a href="/chat" class="landing-primary-btn">
                 <span class="btn-icon">🌸</span>
                 <span class="btn-text">出会いを探す</span>
               </a>
@@ -338,89 +338,73 @@ app.get('/', (c) => {
 })
 
 // 生成ページ（旧トップページの機能）
+// 生成ページはチャットに統合されたため、リダイレクト
 app.get('/generate', (c) => {
-  return c.render(
-    <div class="container">
-      <header class="header">
-        <h1 class="title">✨ Ramat</h1>
-        <p class="subtitle">あなただけの守護動物に出会おう</p>
-      </header>
-
-      <main class="main">
-        <div class="card">
-          <div class="card-content">
-            <p class="description">
-              孤独な魂に寄り添う、世界で一匹だけの<br />
-              「ソウルメイト」があなたを待っています
-            </p>
-            
-            <button class="generate-btn" id="generateBtn">
-              <span class="btn-icon">🌸</span>
-              <span class="btn-text">ソウルメイトを呼ぶ</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="result-area" id="resultArea" style="display: none;">
-          <div class="result-card">
-            <div class="image-container" id="imageContainer">
-              <div class="loading-spinner"></div>
-            </div>
-            
-            <div class="profile-container" id="profileContainer">
-              <h2 class="profile-name">名前が入ります</h2>
-              <p class="profile-concept">コンセプトが入ります</p>
-              <div class="profile-details">
-                <div class="detail-section">
-                  <h3>性格</h3>
-                  <p>性格の説明が入ります</p>
-                </div>
-                <div class="detail-section">
-                  <h3>口調</h3>
-                  <p>口調の説明が入ります</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <nav class="bottom-nav">
-        <a href="/" class="nav-item">
-          <span class="nav-icon">⌂</span>
-          <span class="nav-label">ホーム</span>
-        </a>
-        <a href="/generate" class="nav-item active">
-          <span class="nav-icon">◈</span>
-          <span class="nav-label">生成</span>
-        </a>
-        <a href="/chat" class="nav-item">
-          <span class="nav-icon">💬</span>
-          <span class="nav-label">チャット</span>
-        </a>
-        <a href="/store" class="nav-item">
-          <span class="nav-icon">🛍️</span>
-          <span class="nav-label">ストア</span>
-        </a>
-        <a href="/mypage" class="nav-item">
-          <span class="nav-icon">👤</span>
-          <span class="nav-label">マイページ</span>
-        </a>
-        <a href="/admin" class="nav-item">
-          <span class="nav-icon">✱</span>
-          <span class="nav-label">管理者</span>
-        </a>
-      </nav>
-
-      <script src="/static/app.js"></script>
-    </div>
-  )
+  return c.redirect('/chat')
 })
 
 // チャットページ
 app.get('/chat', (c) => {
   return c.render(
     <div class="chat-container">
+      {/* ソウルメイト生成モーダル（初回のみ表示） */}
+      <div class="generation-modal" id="generationModal" style="display: none;">
+        <div class="generation-modal-content">
+          {/* 初期画面 */}
+          <div class="generation-step" id="stepWelcome">
+            <div class="generation-icon">✨</div>
+            <h2 class="generation-title">あなたのソウルメイトを<br />呼びましょう</h2>
+            <div class="generation-sparkles">🌸 ✨ 🌙</div>
+            <p class="generation-description">
+              心に寄り添う特別な存在が<br />
+              あなたを待っています
+            </p>
+            <button class="generation-btn" id="startGenerationBtn">
+              <span class="btn-icon">🌸</span>
+              <span class="btn-text">ソウルメイトを呼ぶ</span>
+            </button>
+          </div>
+
+          {/* 生成中画面 */}
+          <div class="generation-step" id="stepGenerating" style="display: none;">
+            <div class="generation-loading">
+              <div class="loading-circle"></div>
+              <div class="loading-sparkles">
+                <span class="sparkle">✨</span>
+                <span class="sparkle">🌸</span>
+                <span class="sparkle">🌙</span>
+              </div>
+            </div>
+            <h2 class="generation-title">あなたのソウルメイトに<br />出会っています...</h2>
+            <div class="generation-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+              </div>
+              <p class="progress-text" id="progressText">準備中...</p>
+            </div>
+          </div>
+
+          {/* 完了画面 */}
+          <div class="generation-step" id="stepComplete" style="display: none;">
+            <div class="generation-result">
+              <div class="result-image-wrapper">
+                <img src="" alt="ソウルメイト" class="result-image" id="resultImage" />
+              </div>
+              <h2 class="result-greeting" id="resultGreeting">こんにちは！</h2>
+              <h3 class="result-name" id="resultName">ユキヒメ</h3>
+              <p class="result-concept" id="resultConcept">星影のホッキョクオオカミ</p>
+              <div class="result-details">
+                <p class="result-personality" id="resultPersonality"></p>
+              </div>
+              <button class="start-chat-btn" id="startChatBtn">
+                <span class="btn-icon">💬</span>
+                <span class="btn-text">チャットを始める</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ソウルメイトヘッダー（固定） */}
       <header class="chat-header" id="chatHeader">
         <div class="soulmate-avatar-wrapper">
@@ -432,8 +416,8 @@ app.get('/chat', (c) => {
           />
         </div>
         <div class="soulmate-info">
-          <h2 class="soulmate-name" id="soulmateName">ユキヒメ</h2>
-          <p class="soulmate-concept" id="soulmateConcept">星影のホッキョクオオカミ</p>
+          <h2 class="soulmate-name" id="soulmateName">読み込み中...</h2>
+          <p class="soulmate-concept" id="soulmateConcept">...</p>
         </div>
         <div class="soulmate-status">
           <span class="status-indicator">🟢</span>
@@ -443,15 +427,7 @@ app.get('/chat', (c) => {
 
       {/* チャットメッセージエリア（スクロール可能） */}
       <main class="chat-messages" id="chatMessages">
-        {/* 初期メッセージ */}
-        <div class="message-soulmate">
-          <div class="message-content">
-            <p>こんにちは！✨</p>
-            <p>私はあなたの守護動物、ユキヒメだよ。</p>
-            <p>何でも話してね🌸</p>
-          </div>
-          <div class="message-time">10:30</div>
-        </div>
+        {/* メッセージは動的に追加 */}
       </main>
 
       {/* 入力エリア（固定） */}
@@ -481,6 +457,10 @@ app.get('/chat', (c) => {
         <a href="/chat" class="nav-item active">
           <span class="nav-icon">💬</span>
           <span class="nav-label">チャット</span>
+        </a>
+        <a href="/store" class="nav-item">
+          <span class="nav-icon">🛍️</span>
+          <span class="nav-label">ストア</span>
         </a>
         <a href="/mypage" class="nav-item">
           <span class="nav-icon">👤</span>

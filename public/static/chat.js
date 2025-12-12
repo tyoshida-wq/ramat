@@ -5,6 +5,21 @@ const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
 const chatSendBtn = document.getElementById('chatSendBtn');
 
+// 生成モーダル関連のDOM要素
+const generationModal = document.getElementById('generationModal');
+const startGenerationBtn = document.getElementById('startGenerationBtn');
+const startChatBtn = document.getElementById('startChatBtn');
+const stepWelcome = document.getElementById('stepWelcome');
+const stepGenerating = document.getElementById('stepGenerating');
+const stepComplete = document.getElementById('stepComplete');
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+const resultImage = document.getElementById('resultImage');
+const resultGreeting = document.getElementById('resultGreeting');
+const resultName = document.getElementById('resultName');
+const resultConcept = document.getElementById('resultConcept');
+const resultPersonality = document.getElementById('resultPersonality');
+
 // 現在時刻を取得する関数
 function getCurrentTime() {
   const now = new Date();
@@ -219,6 +234,232 @@ chatInput.addEventListener('keypress', (e) => {
 
 // 初期化時に最新メッセージまでスクロール
 scrollToBottom();
+
+// ==============================================
+// 🌸 生成モーダル機能
+// ==============================================
+
+// ソウルメイトが存在するかチェックする関数
+async function checkSoulmateExists() {
+  try {
+    const userId = getUserId();
+    
+    // まずLocalStorageをチェック（高速）
+    const savedProfile = localStorage.getItem('soulmateProfile');
+    if (savedProfile) {
+      const profile = JSON.parse(savedProfile);
+      if (profile.id || profile.name) {
+        console.log('✅ LocalStorageにソウルメイトが存在します');
+        return true;
+      }
+    }
+    
+    // APIでも確認
+    const response = await fetch(`/api/mypage/profile/${userId}`, {
+      credentials: 'include'
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.profile && data.profile.id) {
+        console.log('✅ APIでソウルメイトが存在します');
+        // LocalStorageも更新
+        localStorage.setItem('soulmateProfile', JSON.stringify(data.profile));
+        return true;
+      }
+    }
+    
+    console.log('❌ ソウルメイトが存在しません');
+    return false;
+    
+  } catch (error) {
+    console.log('ソウルメイト存在確認エラー:', error);
+    // エラー時はLocalStorageのみで判定
+    const savedProfile = localStorage.getItem('soulmateProfile');
+    return savedProfile ? true : false;
+  }
+}
+
+// 生成モーダルを表示する関数
+function showGenerationModal() {
+  if (generationModal) {
+    generationModal.style.display = 'flex';
+    stepWelcome.style.display = 'block';
+    stepGenerating.style.display = 'none';
+    stepComplete.style.display = 'none';
+    document.body.style.overflow = 'hidden'; // スクロール無効化
+    console.log('🌸 生成モーダルを表示しました');
+  }
+}
+
+// 生成モーダルを非表示にする関数
+function hideGenerationModal() {
+  if (generationModal) {
+    generationModal.style.display = 'none';
+    document.body.style.overflow = ''; // スクロール復元
+    console.log('🌸 生成モーダルを非表示にしました');
+  }
+}
+
+// 生成開始ボタンのイベントリスナー
+if (startGenerationBtn) {
+  startGenerationBtn.addEventListener('click', startGeneration);
+}
+
+// チャット開始ボタンのイベントリスナー
+if (startChatBtn) {
+  startChatBtn.addEventListener('click', () => {
+    hideGenerationModal();
+    // ウェルカムメッセージを表示
+    showWelcomeMessage();
+  });
+}
+
+// 生成処理を開始する関数
+async function startGeneration() {
+  try {
+    // ステップ2: 生成中画面に切り替え
+    stepWelcome.style.display = 'none';
+    stepGenerating.style.display = 'block';
+    
+    // プログレスバーのアニメーション開始
+    let progress = 0;
+    const progressMessages = [
+      '出会いを探しています...',
+      'あなたにぴったりの姿を選んでいます...',
+      '心に寄り添う存在を呼んでいます...',
+      'もうすぐ出会えます...'
+    ];
+    
+    const progressInterval = setInterval(() => {
+      if (progress < 90) {
+        progress += Math.random() * 15;
+        if (progress > 90) progress = 90;
+        
+        progressFill.style.width = progress + '%';
+        
+        // メッセージを更新
+        const messageIndex = Math.floor(progress / 25);
+        if (progressMessages[messageIndex]) {
+          progressText.textContent = progressMessages[messageIndex];
+        }
+      }
+    }, 800);
+    
+    // API呼び出し: ソウルメイト生成
+    const userId = getUserId();
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ userId })
+    });
+    
+    if (!response.ok) {
+      throw new Error('生成APIリクエスト失敗');
+    }
+    
+    const data = await response.json();
+    
+    // プログレスバーを完了
+    clearInterval(progressInterval);
+    progress = 100;
+    progressFill.style.width = '100%';
+    progressText.textContent = '出会いました！✨';
+    
+    // 少し待ってから完了画面へ
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // ステップ3: 完了画面に切り替え
+    stepGenerating.style.display = 'none';
+    stepComplete.style.display = 'block';
+    
+    // 結果を表示
+    if (data.image_base64) {
+      resultImage.src = `data:image/png;base64,${data.image_base64}`;
+    } else if (data.image) {
+      resultImage.src = data.image;
+    }
+    
+    resultName.textContent = data.name || 'ソウルメイト';
+    resultConcept.textContent = data.concept || '';
+    resultGreeting.textContent = data.greeting || 'こんにちは！あなたに会えて嬉しいです✨';
+    
+    // 性格情報を表示
+    if (data.personality) {
+      resultPersonality.textContent = `性格: ${data.personality}`;
+    } else if (data.tone) {
+      resultPersonality.textContent = `口調: ${data.tone}`;
+    }
+    
+    // プロフィールをLocalStorageに保存
+    const profileData = {
+      id: data.id || Date.now(),
+      name: data.name,
+      concept: data.concept,
+      personality: data.personality,
+      tone: data.tone,
+      greeting: data.greeting,
+      image: data.image_base64 ? `data:image/png;base64,${data.image_base64}` : data.image
+    };
+    localStorage.setItem('soulmateProfile', JSON.stringify(profileData));
+    
+    // ヘッダー情報も更新
+    updateSoulmateUI(profileData);
+    
+    console.log('✅ ソウルメイト生成完了:', profileData);
+    
+  } catch (error) {
+    console.error('生成エラー:', error);
+    alert('ソウルメイトの生成に失敗しました。もう一度お試しください。');
+    
+    // エラー時は最初の画面に戻る
+    stepGenerating.style.display = 'none';
+    stepWelcome.style.display = 'block';
+    progressFill.style.width = '0%';
+    progressText.textContent = '準備中...';
+  }
+}
+
+// ウェルカムメッセージを表示する関数
+function showWelcomeMessage() {
+  try {
+    const savedProfile = localStorage.getItem('soulmateProfile');
+    if (savedProfile) {
+      const profile = JSON.parse(savedProfile);
+      const name = profile.name || 'ソウルメイト';
+      const greeting = profile.greeting || 'こんにちは！あなたに会えて嬉しいです✨';
+      
+      // 挨拶メッセージを追加
+      addMessage(greeting, false);
+    }
+  } catch (error) {
+    console.log('ウェルカムメッセージ表示エラー:', error);
+  }
+}
+
+// 初回アクセス時のチェック
+async function initializeChatPage() {
+  const exists = await checkSoulmateExists();
+  
+  if (!exists) {
+    console.log('🌸 初回アクセス: 生成モーダルを表示します');
+    showGenerationModal();
+  } else {
+    console.log('✅ ソウルメイト存在確認済み: 通常チャット画面を表示します');
+    // 既存のウェルカムメッセージをカスタマイズ
+    customizeWelcomeMessage();
+  }
+}
+
+// ページ読み込み時に初期化
+initializeChatPage();
+
+// ==============================================
+// 🌸 既存機能
+// ==============================================
 
 // ソウルメイトの情報を読み込む（API + LocalStorage併用）
 async function loadSoulmateInfo() {

@@ -1438,3 +1438,328 @@ body {
     display: none;
   }
 }
+
+/* ========================================
+   ソウルメイト生成モーダル
+======================================== */
+
+/* モーダル背景 */
+.generation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* モーダルコンテンツ */
+.generation-modal-content {
+  background: linear-gradient(135deg, #FFF5F7 0%, #FFE4E9 100%);
+  border-radius: 30px;
+  padding: 3rem 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(255, 105, 180, 0.4);
+  animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ステップコンテナ */
+.generation-step {
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+
+/* アイコン */
+.generation-icon {
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* タイトル */
+.generation-title {
+  font-size: 1.75rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* キラキラエフェクト */
+.generation-sparkles {
+  font-size: 2rem;
+  margin: 1.5rem 0;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* 説明文 */
+.generation-description {
+  font-size: 1.125rem;
+  color: #666;
+  margin-bottom: 2rem;
+  line-height: 1.8;
+}
+
+/* 生成ボタン */
+.generation-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  color: white;
+  padding: 1.25rem 3rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+}
+
+.generation-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(255, 105, 180, 0.5);
+}
+
+.generation-btn:active {
+  transform: translateY(-1px);
+}
+
+/* ローディング画面 */
+.generation-loading {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 2rem;
+}
+
+.loading-circle {
+  width: 200px;
+  height: 200px;
+  border: 8px solid #FFE4E9;
+  border-top: 8px solid #FF69B4;
+  border-radius: 50%;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-sparkles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 1rem;
+  font-size: 2rem;
+}
+
+.sparkle {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.sparkle:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.sparkle:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.sparkle:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* プログレスバー */
+.generation-progress {
+  margin-top: 2rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FF69B4 0%, #FF1493 100%);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+  box-shadow: 0 2px 10px rgba(255, 105, 180, 0.5);
+}
+
+.progress-text {
+  color: #666;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* 完了画面 */
+.generation-result {
+  text-align: center;
+}
+
+.result-image-wrapper {
+  width: 250px;
+  height: 250px;
+  margin: 0 auto 2rem;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
+  animation: zoomIn 0.5s ease;
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.result-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.result-greeting {
+  font-size: 1.5rem;
+  color: #FF69B4;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.result-name {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.result-concept {
+  font-size: 1.125rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.result-details {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 15px;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.result-personality {
+  color: #555;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* チャット開始ボタン */
+.start-chat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  color: white;
+  padding: 1rem 2.5rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 8px 25px rgba(255, 105, 180, 0.4);
+}
+
+.start-chat-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(255, 105, 180, 0.5);
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .generation-modal-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .generation-icon {
+    font-size: 4rem;
+  }
+
+  .generation-title {
+    font-size: 1.5rem;
+  }
+
+  .generation-description {
+    font-size: 1rem;
+  }
+
+  .generation-btn {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+  }
+
+  .result-image-wrapper {
+    width: 200px;
+    height: 200px;
+  }
+
+  .result-name {
+    font-size: 1.75rem;
+  }
+}
