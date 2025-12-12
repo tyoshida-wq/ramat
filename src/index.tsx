@@ -745,7 +745,6 @@ app.get('/store', async (c) => {
                     <p>📱 スマホ用（9:16）とPC用（16:9）の2枚が生成されます</p>
                   </div>
                 </div>
-                <script src="/static/wallpaper-gen.js"></script>
               </div>
             )}
           </section>
@@ -863,6 +862,7 @@ app.get('/store', async (c) => {
           <span class="nav-label">マイページ</span>
         </a>
       </nav>
+      <script src="/static/wallpaper-gen.js"></script>
     </div>
   )
 })
