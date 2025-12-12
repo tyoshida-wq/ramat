@@ -447,20 +447,40 @@ app.get('/chat', (c) => {
       {/* 下部ナビゲーション */}
       <nav class="bottom-nav">
         <a href="/" class="nav-item">
-          <span class="nav-icon">⌂</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </span>
           <span class="nav-label">ホーム</span>
         </a>
 
         <a href="/chat" class="nav-item active">
-          <span class="nav-icon">💬</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </span>
           <span class="nav-label">チャット</span>
         </a>
         <a href="/store" class="nav-item">
-          <span class="nav-icon">🛍️</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"/>
+              <circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+          </span>
           <span class="nav-label">ストア</span>
         </a>
         <a href="/mypage" class="nav-item">
-          <span class="nav-icon">👤</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </span>
           <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item">
@@ -547,16 +567,30 @@ app.get('/mypage', (c) => {
       {/* 下部ナビゲーション */}
       <nav class="bottom-nav">
         <a href="/" class="nav-item">
-          <span class="nav-icon">⌂</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </span>
           <span class="nav-label">ホーム</span>
         </a>
 
         <a href="/chat" class="nav-item">
-          <span class="nav-icon">💬</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </span>
           <span class="nav-label">チャット</span>
         </a>
         <a href="/mypage" class="nav-item active">
-          <span class="nav-icon">👤</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </span>
           <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item">
@@ -823,20 +857,40 @@ app.get('/store', async (c) => {
       {/* ナビゲーション */}
       <nav class="bottom-nav">
         <a href="/" class="nav-item">
-          <span class="nav-icon">⌂</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </span>
           <span class="nav-label">ホーム</span>
         </a>
 
         <a href="/chat" class="nav-item">
-          <span class="nav-icon">💬</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </span>
           <span class="nav-label">チャット</span>
         </a>
         <a href="/store" class="nav-item active">
-          <span class="nav-icon">🛍️</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"/>
+              <circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+          </span>
           <span class="nav-label">ストア</span>
         </a>
         <a href="/mypage" class="nav-item">
-          <span class="nav-icon">👤</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </span>
           <span class="nav-label">マイページ</span>
         </a>
       </nav>
@@ -1013,20 +1067,39 @@ app.get('/admin', (c) => {
 
       <nav class="bottom-nav">
         <a href="/" class="nav-item">
-          <span class="nav-icon">⌂</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </span>
           <span class="nav-label">ホーム</span>
         </a>
 
         <a href="/chat" class="nav-item">
-          <span class="nav-icon">💬</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </span>
           <span class="nav-label">チャット</span>
         </a>
         <a href="/mypage" class="nav-item">
-          <span class="nav-icon">👤</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </span>
           <span class="nav-label">マイページ</span>
         </a>
         <a href="/admin" class="nav-item active">
-          <span class="nav-icon">✱</span>
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"/>
+            </svg>
+          </span>
           <span class="nav-label">管理者</span>
         </a>
       </nav>
