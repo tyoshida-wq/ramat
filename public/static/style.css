@@ -1043,3 +1043,398 @@ body {
     padding: 0.75rem;
   }
 }
+
+/* ========================================
+   ランディングページ専用スタイル
+======================================== */
+
+/* ランディングページコンテナ */
+.landing-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #FFF5F7 0%, #FFE4E9 100%);
+}
+
+/* ヘッダー */
+.landing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 5%;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.landing-logo {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #FF69B4;
+  margin: 0;
+}
+
+.landing-nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.landing-nav-link {
+  color: #666;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: color 0.3s;
+}
+
+.landing-nav-link:hover {
+  color: #FF69B4;
+}
+
+.landing-nav-btn {
+  background: #FF69B4;
+  color: white;
+  padding: 0.625rem 1.5rem;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+}
+
+.landing-nav-btn:hover {
+  background: #FF1493;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+}
+
+/* ヒーローセクション */
+.landing-hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 3rem 5%;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.landing-hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  width: 100%;
+}
+
+.landing-hero-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-illustration {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  filter: drop-shadow(0 10px 30px rgba(255, 105, 180, 0.2));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.landing-hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.landing-hero-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.landing-hero-description {
+  font-size: 1.25rem;
+  color: #666;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.landing-hero-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.landing-primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-size: 1.125rem;
+  font-weight: 600;
+  transition: all 0.3s;
+  box-shadow: 0 8px 25px rgba(255, 105, 180, 0.4);
+}
+
+.landing-primary-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(255, 105, 180, 0.5);
+}
+
+.landing-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: white;
+  color: #333;
+  padding: 1rem 2rem;
+  border: 2px solid #ddd;
+  border-radius: 50px;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.landing-google-btn:hover {
+  border-color: #4285F4;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(66, 133, 244, 0.2);
+}
+
+/* 特徴セクション */
+.landing-features {
+  padding: 4rem 5%;
+  background: white;
+  text-align: center;
+}
+
+.landing-features-title {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 3rem;
+  font-weight: 700;
+}
+
+.landing-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.landing-feature-card {
+  background: linear-gradient(135deg, #FFF5F7 0%, #FFE4E9 100%);
+  padding: 2.5rem 1.5rem;
+  border-radius: 20px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.landing-feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(255, 105, 180, 0.2);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.feature-title {
+  font-size: 1.25rem;
+  color: #333;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.feature-description {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* フッター */
+.landing-footer {
+  background: #f8f9fa;
+  padding: 1.5rem 5%;
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+}
+
+.landing-footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.landing-footer-links a {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.3s;
+}
+
+.landing-footer-links a:hover {
+  color: #FF69B4;
+}
+
+.footer-separator {
+  color: #ccc;
+  font-size: 0.875rem;
+}
+
+.landing-footer-copyright {
+  color: #999;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 1024px) {
+  .landing-hero-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .landing-hero-image {
+    order: -1;
+  }
+
+  .hero-illustration {
+    max-width: 350px;
+  }
+
+  .landing-hero-title {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  .landing-hero-description {
+    font-size: 1.125rem;
+    text-align: center;
+  }
+
+  .landing-features-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-header {
+    padding: 1rem 4%;
+  }
+
+  .landing-logo {
+    font-size: 1.5rem;
+  }
+
+  .landing-nav {
+    gap: 0.5rem;
+  }
+
+  .landing-nav-link {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .landing-nav-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .landing-hero {
+    padding: 2rem 4%;
+  }
+
+  .landing-hero-title {
+    font-size: 1.75rem;
+  }
+
+  .landing-hero-description {
+    font-size: 1rem;
+  }
+
+  .landing-primary-btn,
+  .landing-google-btn {
+    font-size: 1rem;
+    padding: 0.875rem 1.5rem;
+  }
+
+  .hero-illustration {
+    max-width: 280px;
+  }
+
+  .landing-features {
+    padding: 3rem 4%;
+  }
+
+  .landing-features-title {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .landing-feature-card {
+    padding: 2rem 1.25rem;
+  }
+
+  .feature-icon {
+    font-size: 2.5rem;
+  }
+
+  .feature-title {
+    font-size: 1.125rem;
+  }
+
+  .landing-footer {
+    padding: 1.25rem 4%;
+  }
+
+  .landing-footer-links {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-hero-title {
+    font-size: 1.5rem;
+  }
+
+  .landing-hero-description {
+    font-size: 0.95rem;
+  }
+
+  .landing-footer-links {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-separator {
+    display: none;
+  }
+}
