@@ -939,37 +939,6 @@ app.get('/admin', (c) => {
             <h3 class="chart-title">📈 週間生成数推移</h3>
             <canvas id="weeklyChart" class="chart-canvas"></canvas>
           </div>
-          
-          <div class="chart-card">
-            <h3 class="chart-title">🏆 人気動物 TOP 5</h3>
-            <div class="top-animals">
-              <div class="animal-rank">
-                <span class="rank">1</span>
-                <span class="animal-name">🦊 北極ギツネ</span>
-                <div class="rank-bar" style="width: 45%">45%</div>
-              </div>
-              <div class="animal-rank">
-                <span class="rank">2</span>
-                <span class="animal-name">🐼 パンダ</span>
-                <div class="rank-bar" style="width: 30%">30%</div>
-              </div>
-              <div class="animal-rank">
-                <span class="rank">3</span>
-                <span class="animal-name">🦌 トナカイ</span>
-                <div class="rank-bar" style="width: 20%">20%</div>
-              </div>
-              <div class="animal-rank">
-                <span class="rank">4</span>
-                <span class="animal-name">🐨 コアラ</span>
-                <div class="rank-bar" style="width: 3%">3%</div>
-              </div>
-              <div class="animal-rank">
-                <span class="rank">5</span>
-                <span class="animal-name">🦝 アライグマ</span>
-                <div class="rank-bar" style="width: 2%">2%</div>
-              </div>
-            </div>
-          </div>
         </section>
 
         {/* 最近の生成履歴 */}
