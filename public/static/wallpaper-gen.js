@@ -1,5 +1,38 @@
 // 待ち受け画像生成スクリプト
 
+// 準備中モーダルを表示する関数
+function showComingSoonModal() {
+  const modal = document.getElementById('coming-soon-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+// 準備中モーダルを閉じる関数
+function closeComingSoonModal() {
+  const modal = document.getElementById('coming-soon-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
+}
+
+// ページロード時にモーダルを表示
+document.addEventListener('DOMContentLoaded', () => {
+  showComingSoonModal();
+  
+  // モーダル外クリックで閉じる
+  const modal = document.getElementById('coming-soon-modal');
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeComingSoonModal();
+      }
+    });
+  }
+});
+
 async function generateWallpaper(soulmateId) {
   const btn = event.target.closest('button');
   btn.disabled = true;

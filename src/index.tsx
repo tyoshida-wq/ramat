@@ -618,6 +618,36 @@ app.get('/store', async (c) => {
 
   return c.render(
     <div class="store-container">
+      {/* 準備中モーダル */}
+      <div class="coming-soon-modal" id="coming-soon-modal">
+        <div class="coming-soon-content">
+          <div class="coming-soon-icon">🚧</div>
+          <h2 class="coming-soon-title">ストア機能は準備中です</h2>
+          <p class="coming-soon-description">
+            現在、決済システムとの連携を準備しております。<br />
+            もうしばらくお待ちください。
+          </p>
+          <div class="coming-soon-features">
+            <div class="feature-item">
+              <span class="feature-icon">🖼️</span>
+              <span class="feature-text">待ち受け画像</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">🎨</span>
+              <span class="feature-text">カスタムグッズ</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">💝</span>
+              <span class="feature-text">特別アイテム</span>
+            </div>
+          </div>
+          <button class="coming-soon-close-btn" onclick="window.location.href='/chat'">
+            <span class="btn-icon">💬</span>
+            <span class="btn-text">チャットに戻る</span>
+          </button>
+        </div>
+      </div>
+
       <header class="store-header">
         <h1 class="store-title">🛍️ ソウルメイトストア</h1>
         <p class="store-subtitle">あなたのソウルメイトをグッズに</p>
