@@ -485,6 +485,12 @@ async function loadSoulmateInfo() {
   try {
     const userId = await getUserId();
     
+    // userIdが不完全な場合は処理を中止
+    if (!userId || userId.length < 10) {
+      console.log('⚠️ userIdが不完全なため、loadSoulmateInfo()をスキップします:', userId);
+      return;
+    }
+    
     // まずLocalStorageから読み込み（即座に表示）
     const savedProfile = localStorage.getItem('soulmateProfile');
     if (savedProfile) {
@@ -494,7 +500,10 @@ async function loadSoulmateInfo() {
     
     // APIから最新情報を取得
     try {
-      const response = await fetch(`/api/mypage/profile/${userId}`);
+      const response = await fetch(`/api/mypage/profile/${userId}`, {
+        credentials: 'include'
+      });
+      
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.profile) {
@@ -503,6 +512,8 @@ async function loadSoulmateInfo() {
           // LocalStorageも更新
           localStorage.setItem('soulmateProfile', JSON.stringify(data.profile));
         }
+      } else if (response.status === 404) {
+        console.log('ℹ️ ソウルメイトがまだ生成されていません');
       }
     } catch (apiError) {
       console.log('API呼び出し失敗、LocalStorageのデータを使用:', apiError);
