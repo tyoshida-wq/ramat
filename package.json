@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:sandbox": "wrangler pages dev dist --ip 0.0.0.0 --port 3000",
     "build": "vite build",
     "preview": "wrangler pages dev",
     "deploy": "npm run build && wrangler pages deploy",
@@ -10,7 +11,13 @@
     "db:migrate:local": "wrangler d1 migrations apply ramat-production --local",
     "db:migrate:prod": "wrangler d1 migrations apply ramat-production",
     "db:console:local": "wrangler d1 execute ramat-production --local",
-    "db:console:prod": "wrangler d1 execute ramat-production"
+    "db:console:prod": "wrangler d1 execute ramat-production",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:all": "npm run test && npm run test:e2e"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -20,7 +27,11 @@
   "devDependencies": {
     "@hono/vite-build": "^1.2.0",
     "@hono/vite-dev-server": "^0.18.2",
+    "@playwright/test": "^1.57.0",
+    "@vitest/ui": "^4.0.15",
+    "playwright": "^1.57.0",
     "vite": "^6.3.5",
+    "vitest": "^4.0.15",
     "wrangler": "^4.4.0"
   }
 }

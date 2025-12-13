@@ -1,0 +1,71 @@
+
+> test
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv4.0.15 [39m[90m/home/user/webapp[39m
+
+ [31m❯[39m tests/api.test.ts [2m([22m[2m12 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 290[2mms[22m[39m
+     [32m✓[39m GET / - ルートページが正常にリダイレクトする[32m 159[2mms[22m[39m
+     [32m✓[39m GET /login - ログインページが表示される[32m 31[2mms[22m[39m
+     [32m✓[39m GET /chat - 未認証時にリダイレクトされる[32m 8[2mms[22m[39m
+     [32m✓[39m GET /api/auth/me - 未認証時に401エラー[32m 9[2mms[22m[39m
+     [32m✓[39m POST /api/auth/register - 必須フィールドなしで400エラー[32m 18[2mms[22m[39m
+     [32m✓[39m POST /api/auth/login - 必須フィールドなしで400エラー[32m 7[2mms[22m[39m
+     [32m✓[39m POST /api/generate - 未認証時に401エラー[32m 6[2mms[22m[39m
+     [32m✓[39m POST /api/chat/send - 未認証時に401エラー[32m 5[2mms[22m[39m
+     [32m✓[39m 静的ファイルが正しく配信される - chat.js[32m 19[2mms[22m[39m
+[31m     [31m×[31m 静的ファイルが正しく配信される - styles.css[39m[32m 15[2mms[22m[39m
+     [32m✓[39m GET /admin - 未認証時にリダイレクト[32m 5[2mms[22m[39m
+     [32m✓[39m GET /api/admin/stats - 未認証時に401エラー[32m 4[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/e2e.test.ts[2m [ tests/e2e.test.ts ][22m
+[31m[1mError[22m: Playwright Test did not expect test.describe() to be called here.
+Most common reasons include:
+- You are calling test.describe() in a configuration file.
+- You are calling test.describe() in a file that is imported by the configuration file.
+- You have two different versions of @playwright/test. This usually happens
+  when one of the dependencies in your package.json depends on @playwright/test.[39m
+[90m [2m❯[22m TestTypeImpl._currentSuite node_modules/playwright/lib/common/testType.js:[2m75:13[22m[39m
+[90m [2m❯[22m TestTypeImpl._describe node_modules/playwright/lib/common/testType.js:[2m115:24[22m[39m
+[90m [2m❯[22m Function.describe node_modules/playwright/lib/transform/transform.js:[2m275:12[22m[39m
+[36m [2m❯[22m tests/e2e.test.ts:[2m10:6[22m[39m
+    [90m  8| [39m[35mconst[39m [33mBASE_URL[39m [33m=[39m process[33m.[39menv[33m.[39m[33mTEST_URL[39m [33m||[39m [32m'http://localhost:3000'[39m[33m;[39m
+    [90m  9| [39m
+    [90m 10| [39mtest[33m.[39m[34mdescribe[39m([32m'ユーザー登録とログインフロー'[39m[33m,[39m () [33m=>[39m {
+    [90m   | [39m     [31m^[39m
+    [90m 11| [39m  
+    [90m 12| [39m  [34mtest[39m([32m'ログインページが正しく表示される'[39m[33m,[39m [35masync[39m ({ page }) [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mStatic Files[2m > [22m静的ファイルが正しく配信される - styles.css
+[31m[1mAssertionError[22m: expected 404 to be 200 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 200[39m
+[31m+ 404[39m
+
+[36m [2m❯[22m tests/api.test.ts:[2m87:29[22m[39m
+    [90m 85| [39m  [34mit[39m([32m'静的ファイルが正しく配信される - styles.css'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m 86| [39m    [35mconst[39m response [33m=[39m [35mawait[39m [34mfetch[39m([32m`[39m[36m${[39m[33mBASE_URL[39m[36m}[39m[32m/static/styles.css`[39m)[33m;[39m
+    [90m 87| [39m    [34mexpect[39m(response[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m 88| [39m    [34mexpect[39m(response[33m.[39mheaders[33m.[39m[35mget[39m([32m'content-type'[39m))[33m.[39m[34mtoContain[39m([32m'css'[39m)[33m;[39m
+    [90m 89| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m11 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 13:32:15
+[2m   Duration [22m 1.89s[2m (transform 162ms, setup 0ms, import 143ms, tests 290ms, environment 1ms)[22m
+
