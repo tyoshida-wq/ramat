@@ -1,6 +1,6 @@
 // 共通JavaScript
 
-// 管理者かどうかをチェックして、ナビゲーションに管理者リンクを表示
+// 管理者かどうかをチェックして、ナビゲーションに管理者リンク・ログアウトボタンを表示
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     // 認証トークンを取得
@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (data.user && adminEmails.includes(data.user.email)) {
       addAdminNavItem();
     }
+    
+    // 全ユーザーにログアウトボタンを追加
+    addLogoutButton();
   } catch (error) {
     console.error('Failed to check admin status:', error);
   }
@@ -57,6 +60,56 @@ function addAdminNavItem() {
     
     // ナビゲーションの最後に追加
     nav.appendChild(adminLink);
+  });
+}
+
+// ナビゲーションにログアウトボタンを追加
+function addLogoutButton() {
+  const navs = document.querySelectorAll('.bottom-nav');
+  
+  navs.forEach(nav => {
+    // 既にログアウトボタンがある場合はスキップ
+    if (nav.querySelector('#logoutBtn')) {
+      return;
+    }
+
+    // ログアウトボタンを作成
+    const logoutBtn = document.createElement('a');
+    logoutBtn.href = '#';
+    logoutBtn.id = 'logoutBtn';
+    logoutBtn.className = 'nav-item logout-btn';
+    
+    logoutBtn.innerHTML = `
+      <span class="nav-icon">🚪</span>
+      <span class="nav-label">ログアウト</span>
+    `;
+    
+    // ログアウト処理を追加
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      if (confirm('ログアウトしますか？')) {
+        try {
+          const response = await fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+          });
+          
+          if (response.ok) {
+            // ログアウト成功、ログインページへリダイレクト
+            window.location.href = '/login';
+          } else {
+            alert('ログアウトに失敗しました');
+          }
+        } catch (error) {
+          console.error('Logout error:', error);
+          alert('ログアウトに失敗しました');
+        }
+      }
+    });
+    
+    // ナビゲーションの最後に追加
+    nav.appendChild(logoutBtn);
   });
 }
 
