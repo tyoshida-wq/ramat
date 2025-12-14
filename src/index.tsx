@@ -489,6 +489,7 @@ app.get('/chat', (c) => {
         </a>
       </nav>
 
+      <script src="/static/common.js"></script>
       <script src="/static/chat.js"></script>
     </div>
   )
@@ -599,6 +600,7 @@ app.get('/mypage', (c) => {
         </a>
       </nav>
 
+      <script src="/static/common.js"></script>
       <script src="/static/mypage.js"></script>
     </div>
   )
@@ -894,6 +896,7 @@ app.get('/store', async (c) => {
           <span class="nav-label">マイページ</span>
         </a>
       </nav>
+      <script src="/static/common.js"></script>
       <script src="/static/wallpaper-gen.js"></script>
     </div>
   )
@@ -1104,6 +1107,7 @@ app.get('/admin', (c) => {
         </a>
       </nav>
 
+      <script src="/static/common.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       <script src="/static/admin.js"></script>
     </div>
@@ -1701,6 +1705,7 @@ app.get('/privacy', (c) => {
         <a href="/chat" class="nav-item"><i class="fas fa-comment"></i><span>チャット</span></a>
         <a href="/mypage" class="nav-item"><i class="fas fa-user"></i><span>マイページ</span></a>
       </nav>
+      <script src="/static/common.js"></script>
     </div>
   )
 })
@@ -1755,6 +1760,7 @@ app.get('/terms', (c) => {
         <a href="/chat" class="nav-item"><i class="fas fa-comment"></i><span>チャット</span></a>
         <a href="/mypage" class="nav-item"><i class="fas fa-user"></i><span>マイページ</span></a>
       </nav>
+      <script src="/static/common.js"></script>
     </div>
   )
 })
@@ -1825,6 +1831,7 @@ app.get('/legal', (c) => {
         <a href="/chat" class="nav-item"><i class="fas fa-comment"></i><span>チャット</span></a>
         <a href="/mypage" class="nav-item"><i class="fas fa-user"></i><span>マイページ</span></a>
       </nav>
+      <script src="/static/common.js"></script>
     </div>
   )
 })
@@ -1901,6 +1908,7 @@ app.get('/contact', (c) => {
         <a href="/chat" class="nav-item"><i class="fas fa-comment"></i><span>チャット</span></a>
         <a href="/mypage" class="nav-item"><i class="fas fa-user"></i><span>マイページ</span></a>
       </nav>
+      <script src="/static/common.js"></script>
     </div>
   )
 })
